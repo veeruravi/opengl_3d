@@ -329,12 +329,14 @@ GLuint createTexture (const char* filename)
  * Customizable functions *
  **************************/
 
-VAO *cube;
-double length_of_cube_base=20,length_of_base=30,width_of_base=30,height_of_base=1;
-double heights[30][30];
+VAO *cube,*person;
+double length_of_cube_base=20,length_of_base=30,width_of_base=30,height_of_base=2;
+double heights[30][30],empty_cube[30][2],no_of_pits=3;
 int width = 1000;
 int height = 700;
-double camera_angle=0,camera_speed=10;
+double camera_angle=0,camera_speed=1;
+double person_x=0,person_z=0,person_y=30,person_shift=1,fall_state=0;
+int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0;
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
@@ -342,6 +344,15 @@ void intialize_base()
 			heights[i][i1]=height_of_base;
 	heights[29][29]=4;
 	heights[10][10]=0;
+	heights[20][20]=0;
+	heights[25][25]=0;
+	empty_cube[0][0]=length_of_cube_base/2.0+(10-width_of_base/2.0)*length_of_cube_base;
+	empty_cube[0][1]=length_of_cube_base/2.0+(10-length_of_base/2.0)*length_of_cube_base;
+	empty_cube[1][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
+	empty_cube[1][1]=length_of_cube_base/2.0+(20-length_of_base/2.0)*length_of_cube_base;
+	empty_cube[2][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
+	empty_cube[2][1]=length_of_cube_base/2.0+(20-length_of_base/2.0)*length_of_cube_base;
+	
 	//int x=length_of_base-10;
 	// for (int i1 = 0; i1 < width_of_base;i1++)
 	// 	heights[x][i1]=height_of_base+2;
@@ -366,15 +377,24 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 
 	if (action == GLFW_RELEASE) {
 		switch (key) {
-			case GLFW_KEY_C:
-				//rectangle_rot_status = !rectangle_rot_status;
+			case GLFW_KEY_D:
+				d_pressed=0;
+                break;
+			case GLFW_KEY_A:
+				a_pressed=0;
 				break;
-			case GLFW_KEY_P:
-				//triangle_rot_status = !triangle_rot_status;
-				break;
-			case GLFW_KEY_X:
-				// do something ..
-				break;
+			case GLFW_KEY_RIGHT:
+				right_pressed=0;
+                break;
+			case GLFW_KEY_LEFT:
+				left_pressed=0;
+                break;
+			case GLFW_KEY_DOWN:
+				down_pressed=0;
+                break;
+			case GLFW_KEY_UP:
+				up_pressed=0;
+                break;
 			default:
 				break;
 		}
@@ -384,13 +404,25 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 			case GLFW_KEY_ESCAPE:
 				quit(window);
 				break;
-			case GLFW_KEY_UP:
-				camera_angle+=camera_speed;
+			case GLFW_KEY_D:
+				d_pressed=1;
+                break;
+			case GLFW_KEY_A:
+				a_pressed=1;
+				break;
+			case GLFW_KEY_RIGHT:
+				right_pressed=1;
+                break;
+			case GLFW_KEY_LEFT:
+				left_pressed=1;
                 break;
 			case GLFW_KEY_DOWN:
-				camera_angle-=camera_speed;
+				down_pressed=1;
                 break;
-			default:
+			case GLFW_KEY_UP:
+				up_pressed=1;
+                break;
+            default:
 				break;
 		}
 	}
@@ -663,6 +695,18 @@ void drawtext(char *s)
 }
 void draw ()
 {
+	if(d_pressed==1)
+		camera_angle+=camera_speed;
+	if(a_pressed==1)				
+		camera_angle-=camera_speed;
+	if(right_pressed==1)
+		person_z-=person_shift;
+	if(left_pressed==1)
+		person_z+=person_shift;
+	if(down_pressed==1)
+		person_x+=person_shift;
+	if(up_pressed==1)
+		person_x-=person_shift;
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram (programID);
 	glUseProgram(textureProgramID);
@@ -678,6 +722,18 @@ void draw ()
 					length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
 					length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
 		//drawobject(cube,glm::vec3(150+2*length_of_cube_base,440,0),0,glm::vec3(0,0,1));
+	// cout<<person_x<<"	"<<person_z<<"	"<<empty_cube[0][0]<<"	"<<empty_cube[0][1]<<endl;
+	double var1,var2;
+	for (int i = 0; i < no_of_pits;i++)
+	{
+		var1=person_x-empty_cube[i][0];//-length_of_cube_base/2;
+		var2=person_z-empty_cube[i][1];//+length_of_cube_base/2;
+		if (var1<length_of_cube_base/2 && var1>-1*length_of_cube_base/2 && var2<length_of_cube_base/2 && var2>-1*length_of_cube_base/2)
+			fall_state=1;
+	}
+	if (fall_state==1)
+		person_y-=1;
+	drawobject(person,glm::vec3(person_x,person_y,person_z),0,glm::vec3(0,0,1));
 }
 GLFWwindow* initGLFW (int width, int height)
 {
@@ -754,14 +810,17 @@ void initGL (GLFWwindow* window, int width, int height)
 		clr[3*i]=0.2;
 		clr[3*i+1]=0.098;
 		clr[3*i+2]=0;
-		if (i<30&&i>24)
+		if (i<30&&i>=24)
 		{
-			clr[3*i]=0;
-			clr[3*i+1]=0.501;
-			clr[3*i+2]=0;
+			clr[3*i]=0.474;
+			clr[3*i+1]=1;
+			clr[3*i+2]=0.301;
 		}
 	}	
 	cube=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
+	for (int i = 0; i <108;i++)
+		clr[i]=1;
+	person=createCube(clr,length_of_cube_base/3,length_of_cube_base/3,length_of_cube_base/3);
 	fontProgramID = LoadShaders( "fontrender.vert", "fontrender.frag" );
 	GLint fontVertexCoordAttrib, fontVertexNormalAttrib, fontVertexOffsetUniform;
 	fontVertexCoordAttrib = glGetAttribLocation(fontProgramID, "vertexPosition");
@@ -806,6 +865,8 @@ int main (int argc, char** argv)
 			// do something every 0.5 seconds ..
 			last_update_time = current_time;
 		}
+		if (person_y<=0)
+			break;
 	}
 
 	glfwTerminate();
