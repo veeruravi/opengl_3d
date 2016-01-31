@@ -331,34 +331,64 @@ GLuint createTexture (const char* filename)
 
 VAO *cube,*person;
 double top_view=0,reset_view=0;
-double length_of_cube_base=20,length_of_base=30,width_of_base=30,height_of_base=5;
-double heights[30][30],empty_cube[30][2],no_of_pits=4;
-double obstacles[10][2],no_of_obstacles=1;
+double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
+double heights[30][30],empty_cube[30][2],no_of_pits=5;
+double obstacles[121][2],no_of_obstacles=1;
 int width = 1000;
 int height = 700;
 double camera_angle=0,camera_speed=1,camera_y=0;
-double person_x=0,person_z=0,person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,person_shift=1,fall_state=0;
+double person_x=0,person_z=0,person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,person_shift=5,fall_state=0;
 int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0;
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
 		for (int i1 = 0; i1 < width_of_base;i1++)
 			heights[i][i1]=height_of_base;
-	heights[29][29]=height_of_base+1;
+	int x=length_of_base-1,i1=0;
+	for (int i = 0; i < width_of_base;i++)
+	{
+		if (i!=15&&i!=16)
+		{
+			heights[x][i]=height_of_base+2;
+			heights[0][i]=height_of_base+2;
+			obstacles[i1][0]=length_of_cube_base/2.0+(x-width_of_base/2.0)*length_of_cube_base;
+			obstacles[i1][1]=length_of_cube_base/2.0+(i-length_of_base/2.0)*length_of_cube_base;
+			i1++;
+			obstacles[i1][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
+			obstacles[i1][1]=length_of_cube_base/2.0+(i-length_of_base/2.0)*length_of_cube_base;
+			i1++;
+		}
+	}
+	for (int i = 0; i < length_of_base;i++)
+	{
+		heights[i][x]=height_of_base+2;
+		heights[i][0]=height_of_base+2;
+		obstacles[i1][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+		obstacles[i1][1]=length_of_cube_base/2.0+(x-length_of_base/2.0)*length_of_cube_base;
+		i1++;
+		obstacles[i1][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+		obstacles[i1][1]=length_of_cube_base/2.0+(0-length_of_base/2.0)*length_of_cube_base;
+		i1++;
+	}
+	no_of_obstacles=i1;
 	heights[10][10]=0;
 	heights[20][20]=0;
 	heights[25][25]=0;
 	heights[0][15]=0;
+	heights[0][16]=0;
 	empty_cube[0][0]=length_of_cube_base/2.0+(10-width_of_base/2.0)*length_of_cube_base;
 	empty_cube[0][1]=length_of_cube_base/2.0+(10-length_of_base/2.0)*length_of_cube_base;
-	empty_cube[3][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
-	empty_cube[3][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
 	empty_cube[1][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
 	empty_cube[1][1]=length_of_cube_base/2.0+(20-length_of_base/2.0)*length_of_cube_base;
 	empty_cube[2][0]=length_of_cube_base/2.0+(25-width_of_base/2.0)*length_of_cube_base;
 	empty_cube[2][1]=length_of_cube_base/2.0+(25-length_of_base/2.0)*length_of_cube_base;
-	obstacles[0][0]=length_of_cube_base/2.0+(29-width_of_base/2.0)*length_of_cube_base;
-	obstacles[0][1]=length_of_cube_base/2.0+(29-length_of_base/2.0)*length_of_cube_base;
+	empty_cube[3][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
+	empty_cube[3][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
+	empty_cube[4][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
+	empty_cube[4][1]=length_of_cube_base/2.0+(16-length_of_base/2.0)*length_of_cube_base;
+	
+	//obstacles[0][0]=length_of_cube_base/2.0+(29-width_of_base/2.0)*length_of_cube_base;
+	//obstacles[0][1]=length_of_cube_base/2.0+(29-length_of_base/2.0)*length_of_cube_base;
 	//int x=length_of_base-10;
 	// for (int i1 = 0; i1 < width_of_base;i1++)
 	// 	heights[x][i1]=height_of_base+2;
@@ -784,30 +814,13 @@ void draw ()
 	 		person_x=prev_x;
 	 	}
 	}
-	// {
-	// 	var1=person_x-obstacles[i][0];//-length_of_cube_base/2;
-	// 	var2=person_z-obstacles[i][1];//+length_of_cube_base/2;
-	// 	if (var1<length_of_cube_base && var1>-1*length_of_cube_base && var2<length_of_cube_base && var2>-1*length_of_cube_base)
-	// 	{
-	// 		if (var1>=0 && var1<length_of_cube_base)
-	// 		{
-	// 			if (var2>=0 && var2<length_of_cube_base/2)
-	// 			{
-					
-	// 			}
-	// 			if (var2<0 && var2>-1*(length_of_cube_base/2))
-	// 			{
-	// 				/* code */
-	// 			}
-	// 		}
-	// 		if (var1<0 && var1>-1*(length_of_cube_base))
-	// 		{
-				
-	// 		}
-	// 	}
-	// }
 	if (fall_state==1)
+	{
+		person_z=prev_z;
+	 	person_y=prev_y;
+	 	person_x=prev_x;
 		person_y-=1;
+	}
 	drawobject(person,glm::vec3(person_x,person_y,person_z),0,glm::vec3(0,0,1));
 	prev_x=person_x;
 	prev_z=person_z;
