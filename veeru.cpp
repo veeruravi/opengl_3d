@@ -330,62 +330,91 @@ GLuint createTexture (const char* filename)
  **************************/
 
 VAO *cube,*person;
+double key=0;
 double top_view=0,reset_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
-double heights[30][30],empty_cube[30][2],no_of_pits=5;
-double obstacles[121][2],no_of_obstacles=1;
+double heights[30][30],empty_cube[30][2],no_of_pits=0;
+double obstacles[182][2],no_of_obstacles=1;
 int width = 1000;
 int height = 700;
 double camera_angle=0,camera_speed=1,camera_y=0;
-double person_x=0,person_z=0,person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,person_shift=5,fall_state=0;
-int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0;
+double camera_nx=0,camera_ny=0,camera_nz=0,normal_view=0;
+double person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2,person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2,person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,person_shift=5,fall_state=0;
+double person_jump=0,jump_speed=0,jump_direction=1;
+int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0,g_pressed=0,f_pressed=0;
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
 		for (int i1 = 0; i1 < width_of_base;i1++)
 			heights[i][i1]=height_of_base;
-	int x=length_of_base-1,i1=0;
+	int x=length_of_base-1,i2=0;
 	for (int i = 0; i < width_of_base;i++)
 	{
 		if (i!=15&&i!=16)
 		{
 			heights[x][i]=height_of_base+2;
 			heights[0][i]=height_of_base+2;
-			obstacles[i1][0]=length_of_cube_base/2.0+(x-width_of_base/2.0)*length_of_cube_base;
-			obstacles[i1][1]=length_of_cube_base/2.0+(i-length_of_base/2.0)*length_of_cube_base;
-			i1++;
-			obstacles[i1][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
-			obstacles[i1][1]=length_of_cube_base/2.0+(i-length_of_base/2.0)*length_of_cube_base;
-			i1++;
 		}
+		//if(i!=15&&i!=14&&i!=13)
+		heights[(x-1)/2][i]=height_of_base+1;	
 	}
 	for (int i = 0; i < length_of_base;i++)
 	{
 		heights[i][x]=height_of_base+2;
 		heights[i][0]=height_of_base+2;
-		obstacles[i1][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
-		obstacles[i1][1]=length_of_cube_base/2.0+(x-length_of_base/2.0)*length_of_cube_base;
-		i1++;
-		obstacles[i1][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
-		obstacles[i1][1]=length_of_cube_base/2.0+(0-length_of_base/2.0)*length_of_cube_base;
-		i1++;
+		//if(i!=15&&i!=14&&i!=13)
+		heights[i][(x-1)/2]=height_of_base+2;
 	}
-	no_of_obstacles=i1;
-	heights[10][10]=0;
-	heights[20][20]=0;
-	heights[25][25]=0;
-	heights[0][15]=0;
-	heights[0][16]=0;
-	empty_cube[0][0]=length_of_cube_base/2.0+(10-width_of_base/2.0)*length_of_cube_base;
-	empty_cube[0][1]=length_of_cube_base/2.0+(10-length_of_base/2.0)*length_of_cube_base;
-	empty_cube[1][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
-	empty_cube[1][1]=length_of_cube_base/2.0+(20-length_of_base/2.0)*length_of_cube_base;
-	empty_cube[2][0]=length_of_cube_base/2.0+(25-width_of_base/2.0)*length_of_cube_base;
-	empty_cube[2][1]=length_of_cube_base/2.0+(25-length_of_base/2.0)*length_of_cube_base;
-	empty_cube[3][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
-	empty_cube[3][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
-	empty_cube[4][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
-	empty_cube[4][1]=length_of_cube_base/2.0+(16-length_of_base/2.0)*length_of_cube_base;
+	heights[28][24]=height_of_base+1;
+	heights[27][24]=height_of_base+1;
+	heights[26][24]=height_of_base+1;
+	heights[25][24]=height_of_base+1;
+	heights[25][23]=height_of_base+1;
+	heights[25][22]=height_of_base+1;
+	heights[25][21]=height_of_base+1;
+	heights[25][20]=height_of_base+1;
+	heights[26][20]=height_of_base+1;
+	heights[27][20]=height_of_base+1;
+	heights[27][21]=height_of_base+1;
+	for (int i = 0; i < length_of_base;i++)
+		for (int i1 = 0; i1 < width_of_base;i1++)
+		{
+			if(heights[i][i1]!=height_of_base)
+				if ((i!=(x-1)/2 ||(i1!=13&&i1!=15) ) && ( i1!=(x-1)/2 || (i!=13&&i!=15) ))
+				{
+					obstacles[i2][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+					obstacles[i2][1]=length_of_cube_base/2.0+(i1-length_of_base/2.0)*length_of_cube_base;
+					i2++;
+				}
+		}
+	obstacles[i2][0]=length_of_cube_base/2.0+(15-width_of_base/2.0)*length_of_cube_base;
+	obstacles[i2][1]=length_of_cube_base/2.0+((x-1)/2-length_of_base/2.0)*length_of_cube_base;
+	i2++;
+	obstacles[i2][0]=length_of_cube_base/2.0+((x-1)/2-width_of_base/2.0)*length_of_cube_base;
+	obstacles[i2][1]=length_of_cube_base/2.0+(13-length_of_base/2.0)*length_of_cube_base;
+	i2++;
+	obstacles[i2][0]=length_of_cube_base/2.0+(13-width_of_base/2.0)*length_of_cube_base;
+	obstacles[i2][1]=length_of_cube_base/2.0+((x-1)/2-length_of_base/2.0)*length_of_cube_base;
+	i2++;
+	obstacles[i2][0]=length_of_cube_base/2.0+((x-1)/2-width_of_base/2.0)*length_of_cube_base;
+	obstacles[i2][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
+	i2++;
+	no_of_obstacles=i2;
+	// heights[10][10]=0;
+	// heights[20][20]=0;
+	// heights[25][25]=0;
+	// heights[0][15]=0;
+	// heights[0][16]=0;
+	// // empty_cube[0][0]=length_of_cube_base/2.0+(10-width_of_base/2.0)*length_of_cube_base;
+	// empty_cube[0][1]=length_of_cube_base/2.0+(10-length_of_base/2.0)*length_of_cube_base;
+	// empty_cube[1][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
+	// empty_cube[1][1]=length_of_cube_base/2.0+(20-length_of_base/2.0)*length_of_cube_base;
+	// empty_cube[2][0]=length_of_cube_base/2.0+(25-width_of_base/2.0)*length_of_cube_base;
+	// empty_cube[2][1]=length_of_cube_base/2.0+(25-length_of_base/2.0)*length_of_cube_base;
+	// empty_cube[3][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
+	// empty_cube[3][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
+	// empty_cube[4][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
+	// empty_cube[4][1]=length_of_cube_base/2.0+(16-length_of_base/2.0)*length_of_cube_base;
 	
 	//obstacles[0][0]=length_of_cube_base/2.0+(29-width_of_base/2.0)*length_of_cube_base;
 	//obstacles[0][1]=length_of_cube_base/2.0+(29-length_of_base/2.0)*length_of_cube_base;
@@ -437,7 +466,13 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
             case GLFW_KEY_S:
             	s_pressed=0;
                 break;
-			default:
+			case GLFW_KEY_F:
+            	f_pressed=0;
+                break;
+            case GLFW_KEY_G:
+            	g_pressed=0;
+                break;
+            default:
 				break;
 		}
 	}
@@ -465,18 +500,32 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				up_pressed=1;
                 break;
             case GLFW_KEY_T:
-				top_view=1;
+				top_view=1;				
+				normal_view=0;
 				camera_angle=0;
                 break;
             case GLFW_KEY_R:
+				normal_view=0;
 				top_view=0;
 				camera_angle=0;
+                break;
+            case GLFW_KEY_N:
+				normal_view=1;
                 break;
             case GLFW_KEY_W:
             	w_pressed=1;
                 break;
             case GLFW_KEY_S:
             	s_pressed=1;
+                break;
+            case GLFW_KEY_F:
+            	f_pressed=1;
+                break;
+            case GLFW_KEY_G:
+            	g_pressed=1;
+                break;
+            case GLFW_KEY_SPACE:
+            	person_jump=1;
                 break;
             default:
 				break;
@@ -517,21 +566,21 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	 is different from WindowSize */
 	glfwGetFramebufferSize(window, &fbwidth, &fbheight);
 
-	GLfloat fov = 90.0f;
+	GLfloat fov = 9000.0f;
 
 	// sets the viewport of openGL renderer
 	glViewport (0, 0, (GLsizei) fbwidth, (GLsizei) fbheight);
 
 	// set the projection matrix as perspective
-	/* glMatrixMode (GL_PROJECTION);
-	 glLoadIdentity ();
-	 gluPerspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1, 500.0); */
+	// glMatrixMode (GL_PROJECTION);
+	// glLoadIdentity ();
+	//gluPerspective (fov, (GLfloat) width / (GLfloat) height, 0.1, 5000.0f);
 	// Store the projection matrix in a variable for future use
 	// Perspective projection for 3D views
-	// Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 500.0f);
+	 Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 5000.0f);
 
 	// Ortho projection for 2D views
-	Matrices.projection = glm::ortho(-1*(width*2/3)*1.0f, (width*2/3)*1.0f,-1*(height*2/3)*1.0f, (height*2/3)*1.0f, -1000*1.0f, 5000*1.0f);
+	//Matrices.projection = glm::ortho(-1*(width*2/3)*1.0f, (width*2/3)*1.0f,-1*(height*2/3)*1.0f, (height*2/3)*1.0f, -1000*1.0f, 5000*1.0f);
 }
 VAO* createSector(float R,int parts,double clr[6][3])
 {
@@ -726,9 +775,15 @@ void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 	}
 	else
 	{
-		x=0;
+		x=300*cos(camera_angle*M_PI/180);
 		y=400;
-		z=1;
+		z=-300*sin(camera_angle*M_PI/180);
+	}
+	if (normal_view==1)
+	{
+		x=camera_nx;
+		y=camera_ny;
+		z=camera_nz;	
 	}
     Matrices.view = glm::lookAt(glm::vec3(x,y,z), glm::vec3(0,0,0), glm::vec3(0,1,0));
     glm::mat4 VP = Matrices.projection * Matrices.view;
@@ -763,10 +818,20 @@ void drawtext(char *s)
 void draw ()
 {
 	static double prev_x=0,prev_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,prev_z=0;
+	if (person_x>=(length_of_cube_base*width_of_base+length_of_cube_base)/2||person_x<=-1*((length_of_cube_base*width_of_base+length_of_cube_base)/2))
+		fall_state=1;
+	if (person_z>=(length_of_cube_base*length_of_base+length_of_cube_base)/2||person_z<=-1*((length_of_cube_base*length_of_base+length_of_cube_base)/2))
+		fall_state=1;
 	if(d_pressed==1)
+	{
+		camera_nz+=10;
 		camera_angle+=camera_speed;
-	if(a_pressed==1)				
+	}
+	if(a_pressed==1)
+	{
+		camera_nz-=10;
 		camera_angle-=camera_speed;
+	}
 	if(right_pressed==1)
 		person_z-=person_shift;
 	if(left_pressed==1)
@@ -776,15 +841,60 @@ void draw ()
 	if(up_pressed==1)
 		person_x-=person_shift;
 	if(w_pressed==1)
+	{
 		camera_y+=10;
+		camera_nx+=10;
+	}
 	if (s_pressed==1)
+	{
+		camera_nx-=10;
 		camera_y-=10;
+	}
+	if (g_pressed==1)
+		camera_ny+=10;
+	if (f_pressed==1)
+		camera_ny-=10;
+	if(person_jump==1)
+	{
+		if (jump_direction==1)
+			jump_speed+=1;
+		if (jump_speed>length_of_cube_base||jump_direction==-1)
+		{
+			jump_speed-=1;
+			jump_direction=-1;
+		}
+		if (jump_speed==0)
+		{
+			person_jump=0;
+			jump_direction=1;
+		}
+	}
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram (programID);
 	glUseProgram(textureProgramID);
 	glUseProgram(fontProgramID);
 	//drawtext("hello");
 	//for (int i = 0; i < 10; ++i)
+	if(key==1)
+	{
+		int x=length_of_base;
+		heights[(x-2)/2][15]=height_of_base;
+	}
+	else if (key==2)
+	{
+		int x=length_of_base;
+		heights[13][(x-2)/2]=height_of_base;
+	}
+	else if (key==3)
+	{
+		int x=length_of_base;
+		heights[(x-2)/2][13]=height_of_base;
+	}
+	else if (key==4)
+	{
+		int x=length_of_base;
+		heights[15][(x-2)/2]=height_of_base;
+	}
 	glUseProgram (programID);
 	for (int i2 = 0; i2 <length_of_base;i2++)
 		for (int i = 0; i <width_of_base;i++)
@@ -800,10 +910,11 @@ void draw ()
 	{
 		var1=person_x-empty_cube[i][0];//-length_of_cube_base/2;
 		var2=person_z-empty_cube[i][1];//+length_of_cube_base/2;
-		if (var1<length_of_cube_base/2 && var1>-1*length_of_cube_base/2 && var2<length_of_cube_base/2 && var2>-1*length_of_cube_base/2)
-			fall_state=1;
+		if (person_y+jump_speed==length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
+			if (var1<length_of_cube_base/2 && var1>-1*length_of_cube_base/2 && var2<length_of_cube_base/2 && var2>-1*length_of_cube_base/2)
+				fall_state=1;
 	}
-	for (int i = 0; i < no_of_obstacles;i++)
+	for (int i = 0; i < no_of_obstacles-key;i++)
 	{
 		var1=person_x-obstacles[i][0];//-length_of_cube_base/2;
 	 	var2=person_z-obstacles[i][1];//+length_of_cube_base/2;
@@ -814,6 +925,11 @@ void draw ()
 	 		person_x=prev_x;
 	 	}
 	}
+	//	cout<<person_x<<endl;
+	if (person_x==287.5 && person_z==162.5)
+	{
+		key=1;
+	}
 	if (fall_state==1)
 	{
 		person_z=prev_z;
@@ -821,7 +937,7 @@ void draw ()
 	 	person_x=prev_x;
 		person_y-=1;
 	}
-	drawobject(person,glm::vec3(person_x,person_y,person_z),0,glm::vec3(0,0,1));
+	drawobject(person,glm::vec3(person_x,person_y+jump_speed,person_z),0,glm::vec3(0,0,1));
 	prev_x=person_x;
 	prev_z=person_z;
 	prev_y=person_y;
@@ -946,6 +1062,7 @@ int main (int argc, char** argv)
 
 	/* Draw in loop */
 	while (!glfwWindowShouldClose(window)) {
+		//cout<<person_x<<"	drawrawdraw";
 
 		// OpenGL Draw commands
 		draw();
@@ -964,6 +1081,7 @@ int main (int argc, char** argv)
 		}
 		if (person_y<=0)
 			break;
+		cout<<person_x<<"	"<<person_z<<endl;
 	}
 
 	glfwTerminate();
