@@ -400,6 +400,31 @@ void intialize_base()
 	obstacles[i2][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
 	i2++;
 	no_of_obstacles=i2;
+	heights[10][18]=0;
+	heights[10][19]=0;
+	heights[10][20]=0;
+	heights[10][21]=0;
+	heights[10][22]=0;
+	heights[10][23]=0;
+	heights[10][24]=0;
+	heights[10][25]=0;
+	heights[11][18]=0;
+	heights[11][19]=0;
+	heights[11][20]=0;
+	heights[11][21]=0;
+	heights[11][22]=0;
+	heights[11][23]=0;
+	heights[11][24]=0;
+	heights[11][25]=0;
+	heights[12][18]=0;
+	heights[12][19]=0;
+	heights[12][20]=0;
+	heights[12][21]=0;
+	heights[12][22]=0;
+	heights[12][23]=0;
+	heights[12][24]=0;
+	heights[12][25]=0;
+	
 	// heights[10][10]=0;
 	// heights[20][20]=0;
 	// heights[25][25]=0;
@@ -775,9 +800,9 @@ void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 	}
 	else
 	{
-		x=300*cos(camera_angle*M_PI/180);
+		x=0;//300*cos(camera_angle*M_PI/180);
 		y=400;
-		z=-300*sin(camera_angle*M_PI/180);
+		z=1;//-300*sin(camera_angle*M_PI/180);
 	}
 	if (normal_view==1)
 	{
