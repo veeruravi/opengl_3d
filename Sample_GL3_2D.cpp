@@ -240,6 +240,7 @@ int noofcollisions = 0,noofcollisions1=0;
 float forerror=0;
 /* Executed when a regular key is pressed/released/held-down */
 /* Prefered for Keyboard events */ 
+
 void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 {
      // Function is called first on GLFW_PRESS.
@@ -756,7 +757,7 @@ void draw ()
   // use the loaded shader program
   // Don't change unless you know what you are doing
   glUseProgram (programID);
-Matrices.projection = glm::ortho(-zoomX/2.0f, zoomX/2.0f, -zoomY/2.0f, zoomY/2.0f, 0.1f, 500.0f);
+  Matrices.projection = glm::ortho(-zoomX/2.0f, zoomX/2.0f, -zoomY/2.0f, zoomY/2.0f, 0.1f, 500.0f);
   // Eye - Location of camera. Don't change unless you are sure!!
   glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
   // Target - Where is the camera looking at.  Don't change unless you are sure!!

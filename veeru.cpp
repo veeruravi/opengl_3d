@@ -330,6 +330,7 @@ GLuint createTexture (const char* filename)
  **************************/
 
 VAO *cube,*person;
+double camera_x_direction=1,camera_z_direction=1;
 double key=0;
 double top_view=0,reset_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
@@ -340,7 +341,7 @@ int height = 700;
 double camera_angle=0,camera_speed=1,camera_y=0;
 double camera_nx=0,camera_ny=0,camera_nz=0,normal_view=0;
 double person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2,person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2,person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,person_shift=5,fall_state=0;
-double person_jump=0,jump_speed=0,jump_direction=1;
+double person_jump=0,head_view=0,jump_speed=0,jump_direction=1;
 int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0,g_pressed=0,f_pressed=0;
 void intialize_base()
 {
@@ -400,36 +401,13 @@ void intialize_base()
 	obstacles[i2][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
 	i2++;
 	no_of_obstacles=i2;
-	heights[10][18]=0;
-	heights[10][19]=0;
-	heights[10][20]=0;
-	heights[10][21]=0;
-	heights[10][22]=0;
-	heights[10][23]=0;
-	heights[10][24]=0;
-	heights[10][25]=0;
-	heights[11][18]=0;
-	heights[11][19]=0;
-	heights[11][20]=0;
-	heights[11][21]=0;
-	heights[11][22]=0;
-	heights[11][23]=0;
-	heights[11][24]=0;
-	heights[11][25]=0;
-	heights[12][18]=0;
-	heights[12][19]=0;
-	heights[12][20]=0;
-	heights[12][21]=0;
-	heights[12][22]=0;
-	heights[12][23]=0;
-	heights[12][24]=0;
-	heights[12][25]=0;
-	
-	// heights[10][10]=0;
-	// heights[20][20]=0;
-	// heights[25][25]=0;
-	// heights[0][15]=0;
-	// heights[0][16]=0;
+	for (int i = 2; i < 14;i++)
+	{
+		for (int i1 = 15; i1 < 29;i1++)
+		{
+			heights[i][i1]=0;
+		}
+	}
 	// // empty_cube[0][0]=length_of_cube_base/2.0+(10-width_of_base/2.0)*length_of_cube_base;
 	// empty_cube[0][1]=length_of_cube_base/2.0+(10-length_of_base/2.0)*length_of_cube_base;
 	// empty_cube[1][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
@@ -527,15 +505,24 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
             case GLFW_KEY_T:
 				top_view=1;				
 				normal_view=0;
+				head_view=0;
 				camera_angle=0;
                 break;
             case GLFW_KEY_R:
 				normal_view=0;
 				top_view=0;
+				head_view=0;
 				camera_angle=0;
                 break;
             case GLFW_KEY_N:
+            	head_view=0;
+            	top_view=0;
 				normal_view=1;
+                break;
+            case GLFW_KEY_H:
+				head_view=1;
+				normal_view=0;
+				top_view=0;
                 break;
             case GLFW_KEY_W:
             	w_pressed=1;
@@ -791,7 +778,7 @@ VAO* createCube(GLfloat clr[108],double L,double B,double H)
 
 void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 {
-	double x,y,z;
+	double x,y,z,x1=0,y1=0,z1=0;
 	if (top_view==0)
 	{
 		x=300*cos(camera_angle*M_PI/180);
@@ -806,11 +793,25 @@ void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 	}
 	if (normal_view==1)
 	{
-		x=camera_nx;
-		y=camera_ny;
-		z=camera_nz;	
+		x=person_x+(50+camera_nx);//*camera_x_direction;
+		y=person_y+100+camera_ny;
+		z=person_z+camera_nz;
+		x1=person_x;
+		y1=person_y+10+length_of_cube_base;
+		z1=person_z;
 	}
-    Matrices.view = glm::lookAt(glm::vec3(x,y,z), glm::vec3(0,0,0), glm::vec3(0,1,0));
+	if(head_view==1)
+	{
+		x1=person_x+50*camera_x_direction*-1;
+		y1=person_y;
+		z1=person_z+50*camera_z_direction*-1;
+		x=person_x+(length_of_cube_base)*camera_x_direction*-1;
+		y=person_y+length_of_cube_base;
+		z=person_z+length_of_cube_base*camera_z_direction*-1;
+		// if (camera_z_direction==-1)
+		// 	z=person_z;	
+	}
+    Matrices.view = glm::lookAt(glm::vec3(x,y,z), glm::vec3(x1,y1,z1), glm::vec3(0,1,0));
     glm::mat4 VP = Matrices.projection * Matrices.view;
     glm::mat4 MVP;  // MVP = Projection * View * Model
     Matrices.model = glm::mat4(1.0f);
@@ -858,13 +859,29 @@ void draw ()
 		camera_angle-=camera_speed;
 	}
 	if(right_pressed==1)
+	{
+		camera_z_direction=1;
 		person_z-=person_shift;
+		camera_x_direction=0;
+	}
 	if(left_pressed==1)
+	{
+		camera_x_direction=0;
+		camera_z_direction=-1;
 		person_z+=person_shift;
+	}
 	if(down_pressed==1)
+	{
+		camera_z_direction=0;
+		camera_x_direction=-1;
 		person_x+=person_shift;
+	}
 	if(up_pressed==1)
+	{
+		camera_z_direction=0;
+		camera_x_direction=1;
 		person_x-=person_shift;
+	}
 	if(w_pressed==1)
 	{
 		camera_y+=10;
