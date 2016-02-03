@@ -329,7 +329,7 @@ GLuint createTexture (const char* filename)
  * Customizable functions *
  **************************/
 
-VAO *cube,*person,*water;
+VAO *cube,*person,*water,*circle1,*circle2;
 double camera_x_direction=1,camera_z_direction=1;
 double key=0;
 double top_view=0,reset_view=0;
@@ -406,10 +406,20 @@ void intialize_base()
 	{
 		for (int l= 15;l< 29;l++)
 		{
-			heights[i][l]=0;
-			empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
-			empty_cube[k][1]=length_of_cube_base/2.0+(l-length_of_base/2.0)*length_of_cube_base;
-			k++;
+			if (i!=7&&l!=22)
+			{
+				heights[i][l]=0;
+				empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+				empty_cube[k][1]=length_of_cube_base/2.0+(l-length_of_base/2.0)*length_of_cube_base;
+				k++;
+			}
+			if ((i==7||i==6||i==5)&&(l==22||l==23||l==21))
+			{
+				heights[i][l]=0;
+				empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+				empty_cube[k][1]=length_of_cube_base/2.0+(l-length_of_base/2.0)*length_of_cube_base;
+				k++;
+			}
 		}
 	}
 	heights[20][21]=0;
@@ -908,25 +918,20 @@ void draw ()
 	glUseProgram(fontProgramID);
 	//drawtext("hello");
 	//for (int i = 0; i < 10; ++i)
-	if(key==1)
+	if(key>=1)
 	{
 		int x=length_of_base;
 		heights[(x-2)/2][15]=height_of_base;
 	}
-	else if (key==2)
+	if (key>=2)
 	{
 		int x=length_of_base;
 		heights[13][(x-2)/2]=height_of_base;
 	}
-	else if (key==3)
+	if (key>=3)
 	{
 		int x=length_of_base;
 		heights[(x-2)/2][13]=height_of_base;
-	}
-	else if (key==4)
-	{
-		int x=length_of_base;
-		heights[15][(x-2)/2]=height_of_base;
 	}
 	glUseProgram (programID);
 	for (int i2 = 0; i2 <length_of_base;i2++)
@@ -938,7 +943,7 @@ void draw ()
 					length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
 					length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
 			if (heights[i2][i]==0)
-				for (int i1 = 0; i1 < height_of_base;i1++)
+				for (int i1 = 0; i1 < height_of_base-1;i1++)
 					drawobject(water,glm::vec3(
 						length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
 						length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
@@ -968,9 +973,10 @@ void draw ()
 	}
 	//	cout<<person_x<<endl;
 	if (person_x==287.5 && person_z==162.5)
-	{
 		key=1;
-	}
+	if (person_x==-337.5 && person_z==337.5)
+		key=2;
+	
 	if (fall_state==1)
 	{
 		person_z=prev_z;
@@ -1052,7 +1058,7 @@ void initGL (GLFWwindow* window, int width, int height)
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
-	GLfloat clr[108],clr1[108];
+	GLfloat clr[108];
 	for (int i = 0; i < 36;i++)
 	{
 		clr[3*i]=0.2;
@@ -1083,7 +1089,15 @@ void initGL (GLFWwindow* window, int width, int height)
 		clr[3*i+1]=1.0;
 		clr[3*i+2]=0.831;
 	}
-	water=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
+	water=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,(length_of_cube_base*5)/6);
+	double clr1[6][3];
+	for (int i = 0; i < 6;i++)
+	{
+		for (int i1 = 0; i1 < 3; i1++)
+		{
+			clr1[i][i1]=0;
+		}
+	}
 	fontProgramID = LoadShaders( "fontrender.vert", "fontrender.frag" );
 	GLint fontVertexCoordAttrib, fontVertexNormalAttrib, fontVertexOffsetUniform;
 	fontVertexCoordAttrib = glGetAttribLocation(fontProgramID, "vertexPosition");
