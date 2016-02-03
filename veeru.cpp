@@ -329,12 +329,12 @@ GLuint createTexture (const char* filename)
  * Customizable functions *
  **************************/
 
-VAO *cube,*person;
+VAO *cube,*person,*water;
 double camera_x_direction=1,camera_z_direction=1;
 double key=0;
 double top_view=0,reset_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
-double heights[30][30],empty_cube[30][2],no_of_pits=0;
+double heights[30][30],empty_cube[142][2],no_of_pits=1;
 double obstacles[182][2],no_of_obstacles=1;
 int width = 1000;
 int height = 700;
@@ -401,29 +401,22 @@ void intialize_base()
 	obstacles[i2][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
 	i2++;
 	no_of_obstacles=i2;
-	for (int i = 2; i < 14;i++)
+	int k=0;
+	for (int i = 2; i < 12;i++)
 	{
-		for (int i1 = 15; i1 < 29;i1++)
+		for (int l= 15;l< 29;l++)
 		{
-			heights[i][i1]=0;
+			heights[i][l]=0;
+			empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+			empty_cube[k][1]=length_of_cube_base/2.0+(l-length_of_base/2.0)*length_of_cube_base;
+			k++;
 		}
 	}
-	// // empty_cube[0][0]=length_of_cube_base/2.0+(10-width_of_base/2.0)*length_of_cube_base;
-	// empty_cube[0][1]=length_of_cube_base/2.0+(10-length_of_base/2.0)*length_of_cube_base;
-	// empty_cube[1][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
-	// empty_cube[1][1]=length_of_cube_base/2.0+(20-length_of_base/2.0)*length_of_cube_base;
-	// empty_cube[2][0]=length_of_cube_base/2.0+(25-width_of_base/2.0)*length_of_cube_base;
-	// empty_cube[2][1]=length_of_cube_base/2.0+(25-length_of_base/2.0)*length_of_cube_base;
-	// empty_cube[3][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
-	// empty_cube[3][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
-	// empty_cube[4][0]=length_of_cube_base/2.0+(0-width_of_base/2.0)*length_of_cube_base;
-	// empty_cube[4][1]=length_of_cube_base/2.0+(16-length_of_base/2.0)*length_of_cube_base;
-	
-	//obstacles[0][0]=length_of_cube_base/2.0+(29-width_of_base/2.0)*length_of_cube_base;
-	//obstacles[0][1]=length_of_cube_base/2.0+(29-length_of_base/2.0)*length_of_cube_base;
-	//int x=length_of_base-10;
-	// for (int i1 = 0; i1 < width_of_base;i1++)
-	// 	heights[x][i1]=height_of_base+2;
+	heights[20][21]=0;
+	empty_cube[0][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
+	empty_cube[0][1]=length_of_cube_base/2.0+(21-length_of_base/2.0)*length_of_cube_base;
+	no_of_pits=k+1;
+
 }
 
 float formatAngle(float A)
@@ -808,8 +801,6 @@ void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 		x=person_x+(length_of_cube_base)*camera_x_direction*-1;
 		y=person_y+length_of_cube_base;
 		z=person_z+length_of_cube_base*camera_z_direction*-1;
-		// if (camera_z_direction==-1)
-		// 	z=person_z;	
 	}
     Matrices.view = glm::lookAt(glm::vec3(x,y,z), glm::vec3(x1,y1,z1), glm::vec3(0,1,0));
     glm::mat4 VP = Matrices.projection * Matrices.view;
@@ -940,11 +931,19 @@ void draw ()
 	glUseProgram (programID);
 	for (int i2 = 0; i2 <length_of_base;i2++)
 		for (int i = 0; i <width_of_base;i++)
+		{
 			for (int i1 = 0; i1<heights[i2][i];i1++)
 				drawobject(cube,glm::vec3(
 					length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
 					length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
 					length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
+			if (heights[i2][i]==0)
+				for (int i1 = 0; i1 < height_of_base;i1++)
+					drawobject(water,glm::vec3(
+						length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
+						length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
+						length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
+		}
 		//drawobject(cube,glm::vec3(150+2*length_of_cube_base,440,0),0,glm::vec3(0,0,1));
 	// cout<<person_x<<"	"<<person_z<<"	"<<empty_cube[0][0]<<"	"<<empty_cube[0][1]<<endl;
 	double var1,var2;
@@ -1053,7 +1052,7 @@ void initGL (GLFWwindow* window, int width, int height)
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
-	GLfloat clr[108];
+	GLfloat clr[108],clr1[108];
 	for (int i = 0; i < 36;i++)
 	{
 		clr[3*i]=0.2;
@@ -1074,8 +1073,17 @@ void initGL (GLFWwindow* window, int width, int height)
 	}	
 	cube=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
 	for (int i = 0; i <108;i++)
-		clr[i]=1;
+	{
+		clr[i]=0;
+	}
 	person=createCube(clr,length_of_cube_base/3,length_of_cube_base/3,length_of_cube_base/3);
+	for (int i = 0; i <36;i++)
+	{
+		clr[3*i]=0.501;
+		clr[3*i+1]=1.0;
+		clr[3*i+2]=0.831;
+	}
+	water=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
 	fontProgramID = LoadShaders( "fontrender.vert", "fontrender.frag" );
 	GLint fontVertexCoordAttrib, fontVertexNormalAttrib, fontVertexOffsetUniform;
 	fontVertexCoordAttrib = glGetAttribLocation(fontProgramID, "vertexPosition");
