@@ -329,12 +329,20 @@ GLuint createTexture (const char* filename)
  * Customizable functions *
  **************************/
 
-VAO *cube,*person,*water,*circle1,*circle2;
+VAO *cube,*person,*water,*walls;
+double wall[5][4],no_of_walls=2;
+/*
+	0-x
+	1-z
+	2-length
+	3-direction
+*/
+double gameover=0;
 double camera_x_direction=1,camera_z_direction=1;
-double key=0;
+double key=2;
 double top_view=0,reset_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
-double heights[30][30],empty_cube[142][2],no_of_pits=1;
+double heights[30][30],empty_cube[182][2],no_of_pits=1;
 double obstacles[182][2],no_of_obstacles=1;
 int width = 1000;
 int height = 700;
@@ -343,6 +351,7 @@ double camera_nx=0,camera_ny=0,camera_nz=0,normal_view=0;
 double person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2,person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2,person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,person_shift=5,fall_state=0;
 double person_jump=0,head_view=0,jump_speed=0,jump_direction=1;
 int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0,g_pressed=0,f_pressed=0;
+int l_pressed=0;
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
@@ -422,11 +431,38 @@ void intialize_base()
 			}
 		}
 	}
+	for (int i = 1; i <14;i++)
+	{
+		heights[i][4]=0;
+		empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+		empty_cube[k][1]=length_of_cube_base/2.0+(4-length_of_base/2.0)*length_of_cube_base;
+		k++;
+		heights[i][8]=0;
+		empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+		empty_cube[k][1]=length_of_cube_base/2.0+(8-length_of_base/2.0)*length_of_cube_base;
+		k++;
+		heights[i][12]=0;
+		empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+		empty_cube[k][1]=length_of_cube_base/2.0+(12-length_of_base/2.0)*length_of_cube_base;
+		k++;
+	}
 	heights[20][21]=0;
-	empty_cube[0][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
-	empty_cube[0][1]=length_of_cube_base/2.0+(21-length_of_base/2.0)*length_of_cube_base;
+	empty_cube[k][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
+	empty_cube[k][1]=length_of_cube_base/2.0+(21-length_of_base/2.0)*length_of_cube_base;
 	no_of_pits=k+1;
-
+	wall[0][0]=-300;
+	wall[0][1]=length_of_cube_base/2.0+(4-length_of_base/2.0)*length_of_cube_base;
+	wall[0][2]=length_of_cube_base*2;
+	wall[0][3]=1;
+	wall[1][0]=-200;
+	wall[1][1]=length_of_cube_base/2.0+(8-length_of_base/2.0)*length_of_cube_base;
+	wall[1][2]=length_of_cube_base*2;
+	wall[1][3]=1;
+	wall[2][0]=-100;
+	wall[2][1]=length_of_cube_base/2.0+(12-length_of_base/2.0)*length_of_cube_base;
+	wall[2][2]=length_of_cube_base*2;
+	wall[2][3]=1;
+	no_of_walls=3;
 }
 
 float formatAngle(float A)
@@ -478,6 +514,9 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
             case GLFW_KEY_G:
             	g_pressed=0;
                 break;
+            case GLFW_KEY_L:
+            	l_pressed=0;
+                break;
             default:
 				break;
 		}
@@ -495,6 +534,9 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				break;
 			case GLFW_KEY_RIGHT:
 				right_pressed=1;
+                break;
+			case GLFW_KEY_L:
+            	l_pressed=1;
                 break;
 			case GLFW_KEY_LEFT:
 				left_pressed=1;
@@ -897,6 +939,15 @@ void draw ()
 		camera_ny+=10;
 	if (f_pressed==1)
 		camera_ny-=10;
+	if (l_pressed==1)
+	{
+		person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2;
+		person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2;
+		person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base;
+		key=2;
+		fall_state=0;
+		gameover=0;
+	}
 	if(person_jump==1)
 	{
 		if (jump_direction==1)
@@ -958,7 +1009,14 @@ void draw ()
 		var2=person_z-empty_cube[i][1];//+length_of_cube_base/2;
 		if (person_y+jump_speed==length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
 			if (var1<length_of_cube_base/2 && var1>-1*length_of_cube_base/2 && var2<length_of_cube_base/2 && var2>-1*length_of_cube_base/2)
+			{
+				cout<<i<<"	"<<person_x<<"	"<<person_z<<"	"<<empty_cube[i][0]<<"	"<<empty_cube[i][1]<<endl;
 				fall_state=1;
+			}
+		// if (i==0)
+		// 	cout<<i<<"	"<<person_x<<"	"<<person_z<<"	"<<empty_cube[i][0]<<"	"<<empty_cube[i][1]<<var1<<"	"<<var2<<endl;
+		// if (var1>-6&&var1<6&&var2>=-6&&var2<6)
+		// 	fall_state=-1;
 	}
 	for (int i = 0; i < no_of_obstacles-key;i++)
 	{
@@ -984,7 +1042,38 @@ void draw ()
 	 	person_x=prev_x;
 		person_y-=1;
 	}
-	drawobject(person,glm::vec3(person_x,person_y+jump_speed,person_z),0,glm::vec3(0,0,1));
+	if (gameover==0)
+		drawobject(person,glm::vec3(person_x,person_y+jump_speed,person_z),0,glm::vec3(0,0,1));
+	for (int i = 0; i < no_of_walls;i++)
+	{
+		var1=person_x-wall[i][0];
+		var2=person_z-wall[i][1];
+		if (var1<0)
+			var1*=-1;
+		//var1-=(length_of_cube_base/3);//+length_of_cube_base/2);
+		if (var2<0)
+			var2*=-1;
+		//var2-=(length_of_cube_base/3);//+length_of_cube_base/2);
+		if ((var1>0&&var1<wall[i][2]+length_of_cube_base/3)&&(var2>0&&var2<length_of_cube_base))
+		{
+			cout<<"hello"<<endl;
+			person_z=prev_z;
+	 		person_y=prev_y;
+	 		person_x=prev_x;
+	 		if (var2>0&&var2<length_of_cube_base)
+		 		wall[i][3]*=-1;		
+		 	gameover=1;
+		}
+		drawobject(walls,glm::vec3(wall[i][0],length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,wall[i][1]),0,glm::vec3(0,0,1));
+		if (wall[i][3]==1)
+			wall[i][0]+=5;
+		else 
+			wall[i][0]-=5;
+		if (wall[i][0]+wall[i][2]+length_of_cube_base>0)
+			wall[i][3]*=-1;
+		else if (wall[i][0]<-300)
+			wall[i][3]*=-1;
+	}
 	prev_x=person_x;
 	prev_z=person_z;
 	prev_y=person_y;
@@ -1089,6 +1178,7 @@ void initGL (GLFWwindow* window, int width, int height)
 		clr[3*i+1]=1.0;
 		clr[3*i+2]=0.831;
 	}
+	walls=createCube(clr,length_of_cube_base*2,length_of_cube_base/2,length_of_cube_base/2);
 	water=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,(length_of_cube_base*5)/6);
 	double clr1[6][3];
 	for (int i = 0; i < 6;i++)
@@ -1144,8 +1234,8 @@ int main (int argc, char** argv)
 			last_update_time = current_time;
 		}
 		if (person_y<=0)
-			break;
-		cout<<person_x<<"	"<<person_z<<endl;
+			gameover=1;
+		//cout<<person_x<<"	"<<person_z<<endl;
 	}
 
 	glfwTerminate();
