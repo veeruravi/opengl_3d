@@ -329,7 +329,7 @@ GLuint createTexture (const char* filename)
  * Customizable functions *
  **************************/
 
-VAO *cube,*person,*water,*walls;
+VAO *cube,*person_body,*water,*walls,*person_leg,*person_hand,*person_eye,*person_neck,*person_head,*person_hair;
 double wall[5][4],no_of_walls=2;
 /*
 	0-x
@@ -1043,7 +1043,51 @@ void draw ()
 		person_y-=1;
 	}
 	if (gameover==0)
-		drawobject(person,glm::vec3(person_x,person_y+jump_speed,person_z),0,glm::vec3(0,0,1));
+	{
+		if (camera_x_direction==1||camera_x_direction==-1)
+		{
+			drawobject(person_leg,glm::vec3(person_x,person_y+jump_speed,person_z+6),0,glm::vec3(0,0,1));
+			drawobject(person_leg,glm::vec3(person_x,person_y+jump_speed,person_z-6),0,glm::vec3(0,0,1));
+		}
+		if (camera_z_direction==1||camera_z_direction==-1)
+		{
+			drawobject(person_leg,glm::vec3(person_x+6,person_y+jump_speed,person_z),0,glm::vec3(0,0,1));
+			drawobject(person_leg,glm::vec3(person_x-6,person_y+jump_speed,person_z),0,glm::vec3(0,0,1));
+		}
+		drawobject(person_body,glm::vec3(person_x,person_y+jump_speed+12+length_of_cube_base/3,person_z),0,glm::vec3(0,0,1));
+		for (int i = 0; i < 360; ++i)
+			drawobject(person_neck,glm::vec3(person_x,person_y+jump_speed+12+length_of_cube_base,person_z),i,glm::vec3(0,1,0));
+		if (camera_x_direction==1||camera_x_direction==-1)
+		{
+			drawobject(person_head,glm::vec3(person_x,person_y+jump_speed+12+7+length_of_cube_base,person_z),0,glm::vec3(0,1,0));
+			var1=-10;
+			if (camera_x_direction==-1)
+				var1=10;
+			for (int i = 0; i < 360;i++)
+				drawobject(person_eye,glm::vec3(person_x+var1,person_y+jump_speed+12+6+length_of_cube_base,person_z-8),i,glm::vec3(1,0,0));
+			for (int i = 0; i < 360;i++)
+				drawobject(person_eye,glm::vec3(person_x+var1,person_y+jump_speed+12+6+length_of_cube_base,person_z+8),i,glm::vec3(1,0,0));
+			var1=2;
+			if (camera_x_direction==-1)
+				var1=-2;
+			drawobject(person_hair,glm::vec3(person_x+var1,person_y+jump_speed+12+7+6+length_of_cube_base,person_z),0,glm::vec3(0,1,0));
+		}
+		else
+		{
+			drawobject(person_head,glm::vec3(person_x,person_y+jump_speed+12+7+length_of_cube_base,person_z),90,glm::vec3(0,1,0));
+			var1=-10;
+			if (camera_z_direction==-1)
+				var1=10;
+			for (int i = 0; i < 360;i++)
+				drawobject(person_eye,glm::vec3(person_x-8,person_y+jump_speed+12+6+length_of_cube_base,person_z+var1),i,glm::vec3(0,0,1));
+			for (int i = 0; i < 360;i++)
+				drawobject(person_eye,glm::vec3(person_x+8,person_y+jump_speed+12+6+length_of_cube_base,person_z+var1),i,glm::vec3(0,0,1));
+			var1=2;
+			if (camera_z_direction==-1)
+				var1=-2;
+			drawobject(person_hair,glm::vec3(person_x,person_y+jump_speed+12+7+6+length_of_cube_base,person_z+var1),90,glm::vec3(0,1,0));
+		}
+	}
 	for (int i = 0; i < no_of_walls;i++)
 	{
 		var1=person_x-wall[i][0];
@@ -1171,7 +1215,18 @@ void initGL (GLFWwindow* window, int width, int height)
 	{
 		clr[i]=0;
 	}
-	person=createCube(clr,length_of_cube_base/3,length_of_cube_base/3,length_of_cube_base/3);
+	person_body=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
+	person_leg=createCube(clr,4,4,12);
+	person_neck=createCube(clr,3,3,7);
+	for (int i = 0; i <108;i++)
+		clr[i]=0.5;
+	person_head=createCube(clr,10,18,6);
+	for (int i = 0; i <108;i++)
+		clr[i]=0.7;
+	person_hair=createCube(clr,11,22,4);
+	for (int i = 0; i <108;i++)
+		clr[i]=0;
+	person_eye=createCube(clr,2,2,2);
 	for (int i = 0; i <36;i++)
 	{
 		clr[3*i]=0.501;
