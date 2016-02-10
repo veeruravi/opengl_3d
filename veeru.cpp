@@ -352,6 +352,7 @@ double person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2,per
 double person_jump=0,head_view=0,jump_speed=0,jump_direction=1;
 int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0,g_pressed=0,f_pressed=0;
 int l_pressed=0;
+double person_hand_angle=30;
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
@@ -821,6 +822,155 @@ VAO* createCube(GLfloat clr[108],double L,double B,double H)
   	return create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, clr, GL_FILL);
 }
 
+VAO* createCube1(GLfloat clr[108],double L,double B,double H)
+{
+	
+	GLfloat vertex_buffer_data [] = {
+		//Front Face
+		0, 0,  2*B,
+		2*L, 0,  2*B,
+		2*L,  2*H,  2*B,
+		2*L,  2*H,  2*B,
+		0,  2*H, 2*B,
+		0, 0,  2*B,
+		//Back Face
+		0, 0, 0,
+		2*L, 0, 0,
+		2*L,  2*H, 0,
+		2*L,  2*H, 0,
+		0,  2*H, 0,
+		0, 0, 0,
+		//left Face
+		0, 0,  2*B,
+		0, 0, 0,
+		0,  2*H, 0,
+		0,  2*H, 0,
+		0,  2*H,  2*B,
+		0, 0,  2*B,
+		//right Face
+		2*L, 0,  2*B,
+		2*L, 0, 0,
+		2*L,  2*H, 0,
+		2*L,  2*H, 0,
+		2*L,  2*H,  2*B,
+		2*L, 0,  2*B,
+		//Top Face
+		0,  2*H,  2*B,
+		0,  2*H, 0,
+		2*L,  2*H, 0,
+		2*L,  2*H, 0,
+		2*L,  2*H,  2*B,
+		0,  2*H,  2*B,
+		//Bottom Face
+		0, 0,  2*B,
+		0, 0, 0,
+		2*L, 0, 0,
+		2*L, 0, 0,
+		2*L, 0,  2*B,
+		0, 0,  2*B
+	};
+	/*const GLfloat color_buffer_data [] = 
+	{
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2], // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2], // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2],  // color 1
+
+	    clr[0][0],clr[0][1],clr[0][2], // color 1
+	    clr[1][0],clr[1][1],clr[1][2], // color 2
+	    clr[2][0],clr[2][1],clr[2][2], // color 3
+
+	    clr[3][0],clr[3][1],clr[3][2], // color 3
+	    clr[4][0],clr[4][1],clr[4][2], // color 4
+	    clr[5][0],clr[5][1],clr[5][2]  // color 1
+  	};*/
+  	return create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, clr, GL_FILL);
+}
+
+
 void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 {
 	double x,y,z,x1=0,y1=0,z1=0;
@@ -906,24 +1056,28 @@ void draw ()
 		camera_z_direction=1;
 		person_z-=person_shift;
 		camera_x_direction=0;
+		person_hand_angle*=-1;
 	}
 	if(left_pressed==1)
 	{
 		camera_x_direction=0;
 		camera_z_direction=-1;
 		person_z+=person_shift;
+		person_hand_angle*=-1;
 	}
 	if(down_pressed==1)
 	{
 		camera_z_direction=0;
 		camera_x_direction=-1;
 		person_x+=person_shift;
+		person_hand_angle*=-1;
 	}
 	if(up_pressed==1)
 	{
 		camera_z_direction=0;
 		camera_x_direction=1;
 		person_x-=person_shift;
+		person_hand_angle*=-1;
 	}
 	if(w_pressed==1)
 	{
@@ -1060,6 +1214,8 @@ void draw ()
 		if (camera_x_direction==1||camera_x_direction==-1)
 		{
 			drawobject(person_head,glm::vec3(person_x,person_y+jump_speed+12+7+length_of_cube_base,person_z),0,glm::vec3(0,1,0));
+			drawobject(person_hand,glm::vec3(person_x,person_y+jump_speed+30,person_z-18),person_hand_angle,glm::vec3(0,0,1));
+			drawobject(person_hand,glm::vec3(person_x,person_y+jump_speed+30,person_z+12),-1*person_hand_angle,glm::vec3(0,0,1));
 			var1=-10;
 			if (camera_x_direction==-1)
 				var1=10;
@@ -1075,6 +1231,8 @@ void draw ()
 		else
 		{
 			drawobject(person_head,glm::vec3(person_x,person_y+jump_speed+12+7+length_of_cube_base,person_z),90,glm::vec3(0,1,0));
+			drawobject(person_hand,glm::vec3(person_x+12,person_y+jump_speed+30,person_z),person_hand_angle,glm::vec3(1,0,0));
+			drawobject(person_hand,glm::vec3(person_x-18,person_y+jump_speed+30,person_z),-1*person_hand_angle,glm::vec3(1,0,0));
 			var1=-10;
 			if (camera_z_direction==-1)
 				var1=10;
@@ -1227,6 +1385,9 @@ void initGL (GLFWwindow* window, int width, int height)
 	for (int i = 0; i <108;i++)
 		clr[i]=0;
 	person_eye=createCube(clr,2,2,2);
+	for (int i = 0; i <108;i++)
+		clr[i]=1;
+	person_hand=createCube1(clr,3,3,-10);
 	for (int i = 0; i <36;i++)
 	{
 		clr[3*i]=0.501;
