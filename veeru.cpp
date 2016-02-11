@@ -337,8 +337,11 @@ double wall[5][4],no_of_walls=2;
 	2-length
 	3-direction
 */
+
+double xmousePos,ymousePos,mouse_scroll=0;
+double left_button_Pressed=0,right_button_Pressed=0;
 double gameover=0;
-double camera_x_direction=1,camera_z_direction=1;
+double camera_x_direction=1,camera_z_direction=1,radius_of_camera=300;
 double key=2;
 double top_view=0,reset_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
@@ -479,6 +482,14 @@ float D2R(float A)
     return (A*M_PI)/180.0f;
 }
 
+void mousescroll(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (yoffset==-1)
+         camera_y-=10;
+    else if (yoffset==1)
+        camera_y+=10;
+}
+
 void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	// Function is called first on GLFW_PRESS.
@@ -605,16 +616,27 @@ void mouseButton (GLFWwindow* window, int button, int action, int mods)
 {
 	switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
-			if (action == GLFW_RELEASE)
-				//triangle_rot_dir *= -1;
-			break;
-		case GLFW_MOUSE_BUTTON_RIGHT:
-			if (action == GLFW_RELEASE) {
-				//rectangle_rot_dir *= -1;
-			}
-			break;
-		default:
-			break;
+            if (action == GLFW_RELEASE)
+            {
+                left_button_Pressed = 0;
+            }
+            if(action==GLFW_PRESS)
+            {
+                left_button_Pressed=1;
+            }
+            break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            if (action == GLFW_RELEASE)
+            {
+                right_button_Pressed=0;
+            }
+            if(action==GLFW_PRESS)
+            {
+                right_button_Pressed=1;
+            }
+            break;
+        default:
+            break;
 	}
 }
 void reshapeWindow (GLFWwindow* window, int width, int height)
@@ -976,15 +998,15 @@ void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 	double x,y,z,x1=0,y1=0,z1=0;
 	if (top_view==0)
 	{
-		x=300*cos(camera_angle*M_PI/180);
-		z=-300*sin(camera_angle*M_PI/180);
+		x=radius_of_camera*cos(camera_angle*M_PI/180);
+		z=-1*radius_of_camera*sin(camera_angle*M_PI/180);
 		y=camera_y;
 	}
 	else
 	{
-		x=0;//300*cos(camera_angle*M_PI/180);
+		x=1;//300*cos(camera_angle*M_PI/180);
 		y=400;
-		z=1;//-300*sin(camera_angle*M_PI/180);
+		z=0;//-300*sin(camera_angle*M_PI/180);
 	}
 	if (normal_view==1)
 	{
@@ -1037,6 +1059,7 @@ void drawtext(char *s)
 void draw ()
 {
 	static double prev_x=0,prev_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,prev_z=0;
+	static double x_mouse1,y_mouse1;
 	if (person_x>=(length_of_cube_base*width_of_base+length_of_cube_base)/2||person_x<=-1*((length_of_cube_base*width_of_base+length_of_cube_base)/2))
 		fall_state=1;
 	if (person_z>=(length_of_cube_base*length_of_base+length_of_cube_base)/2||person_z<=-1*((length_of_cube_base*length_of_base+length_of_cube_base)/2))
@@ -1079,6 +1102,23 @@ void draw ()
 		person_x-=person_shift;
 		person_hand_angle+=hand_angle_speed;
 	}
+	if (left_pressed==0&&right_pressed==0&&up_pressed==0&&down_pressed==0)
+		person_hand_angle=0;
+	if (left_button_Pressed==1&&mouse_scroll==0)
+	{
+		x_mouse1=xmousePos;
+		y_mouse1=ymousePos;
+		mouse_scroll=1;
+	}
+	if (left_button_Pressed==1&&mouse_scroll==1)
+	{
+		camera_angle+=((x_mouse1-xmousePos)/10);
+		radius_of_camera+=(y_mouse1-ymousePos);
+		x_mouse1=xmousePos;
+		y_mouse1=ymousePos;
+	}
+	if (left_button_Pressed==0)
+		mouse_scroll=0;
 	if (person_hand_angle>30)
 		hand_angle_speed=-5;
 	else if (person_hand_angle<-30)
@@ -1168,7 +1208,7 @@ void draw ()
 		if (person_y+jump_speed==length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
 			if (var1<length_of_cube_base/2 && var1>-1*length_of_cube_base/2 && var2<length_of_cube_base/2 && var2>-1*length_of_cube_base/2)
 			{
-				cout<<i<<"	"<<person_x<<"	"<<person_z<<"	"<<empty_cube[i][0]<<"	"<<empty_cube[i][1]<<endl;
+				//cout<<i<<"	"<<person_x<<"	"<<person_z<<"	"<<empty_cube[i][0]<<"	"<<empty_cube[i][1]<<endl;
 				fall_state=1;
 			}
 		// if (i==0)
@@ -1209,8 +1249,8 @@ void draw ()
 		}
 		if (camera_z_direction==1||camera_z_direction==-1)
 		{
-			drawobject(person_leg,glm::vec3(person_x+6,person_y+jump_speed+10,person_z),person_hand_angle,glm::vec3(1,0,0));
-			drawobject(person_leg,glm::vec3(person_x-6,person_y+jump_speed+10,person_z),-1*person_hand_angle,glm::vec3(1,0,0));
+			drawobject(person_leg,glm::vec3(person_x+6,person_y+jump_speed+10,person_z),-1*person_hand_angle,glm::vec3(1,0,0));
+			drawobject(person_leg,glm::vec3(person_x-6,person_y+jump_speed+10,person_z),person_hand_angle,glm::vec3(1,0,0));
 		}
 		drawobject(person_body,glm::vec3(person_x,person_y+jump_speed+12+length_of_cube_base/3,person_z),0,glm::vec3(0,0,1));
 		for (int i = 0; i < 360; ++i)
@@ -1262,7 +1302,7 @@ void draw ()
 		//var2-=(length_of_cube_base/3);//+length_of_cube_base/2);
 		if ((var1>0&&var1<wall[i][2]+length_of_cube_base/3)&&(var2>0&&var2<length_of_cube_base))
 		{
-			cout<<"hello"<<endl;
+			//cout<<"hello"<<endl;
 			person_z=prev_z;
 	 		person_y=prev_y;
 	 		person_x=prev_x;
@@ -1443,10 +1483,10 @@ int main (int argc, char** argv)
 
 		// Swap Frame Buffer in double buffering
 		glfwSwapBuffers(window);
-
+        glfwGetCursorPos(window,&xmousePos,&ymousePos);
 		// Poll for Keyboard and mouse events
 		glfwPollEvents();
-
+		glfwSetScrollCallback(window, mousescroll);
 		// Control based on time (Time based transformation like 5 degrees rotation every 0.5s)
 		current_time = glfwGetTime(); // Time in seconds
 		if ((current_time - last_update_time) >= 0.5) { // atleast 0.5s elapsed since last frame
