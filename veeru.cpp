@@ -352,7 +352,7 @@ double person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2,per
 double person_jump=0,head_view=0,jump_speed=0,jump_direction=1;
 int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0,g_pressed=0,f_pressed=0;
 int l_pressed=0;
-double person_hand_angle=30;
+double person_hand_angle=0,hand_angle_speed=5;
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
@@ -1056,29 +1056,33 @@ void draw ()
 		camera_z_direction=1;
 		person_z-=person_shift;
 		camera_x_direction=0;
-		person_hand_angle*=-1;
+		person_hand_angle+=hand_angle_speed;
 	}
 	if(left_pressed==1)
 	{
 		camera_x_direction=0;
 		camera_z_direction=-1;
 		person_z+=person_shift;
-		person_hand_angle*=-1;
+		person_hand_angle+=hand_angle_speed;
 	}
 	if(down_pressed==1)
 	{
 		camera_z_direction=0;
 		camera_x_direction=-1;
 		person_x+=person_shift;
-		person_hand_angle*=-1;
+		person_hand_angle+=hand_angle_speed;
 	}
 	if(up_pressed==1)
 	{
 		camera_z_direction=0;
 		camera_x_direction=1;
 		person_x-=person_shift;
-		person_hand_angle*=-1;
+		person_hand_angle+=hand_angle_speed;
 	}
+	if (person_hand_angle>30)
+		hand_angle_speed=-5;
+	else if (person_hand_angle<-30)
+		hand_angle_speed=5;
 	if(w_pressed==1)
 	{
 		camera_y+=10;
@@ -1200,13 +1204,13 @@ void draw ()
 	{
 		if (camera_x_direction==1||camera_x_direction==-1)
 		{
-			drawobject(person_leg,glm::vec3(person_x,person_y+jump_speed,person_z+6),0,glm::vec3(0,0,1));
-			drawobject(person_leg,glm::vec3(person_x,person_y+jump_speed,person_z-6),0,glm::vec3(0,0,1));
+			drawobject(person_leg,glm::vec3(person_x,person_y+jump_speed+10,person_z+6),person_hand_angle,glm::vec3(0,0,1));
+			drawobject(person_leg,glm::vec3(person_x,person_y+jump_speed+10,person_z-6),-1*person_hand_angle,glm::vec3(0,0,1));
 		}
 		if (camera_z_direction==1||camera_z_direction==-1)
 		{
-			drawobject(person_leg,glm::vec3(person_x+6,person_y+jump_speed,person_z),0,glm::vec3(0,0,1));
-			drawobject(person_leg,glm::vec3(person_x-6,person_y+jump_speed,person_z),0,glm::vec3(0,0,1));
+			drawobject(person_leg,glm::vec3(person_x+6,person_y+jump_speed+10,person_z),person_hand_angle,glm::vec3(1,0,0));
+			drawobject(person_leg,glm::vec3(person_x-6,person_y+jump_speed+10,person_z),-1*person_hand_angle,glm::vec3(1,0,0));
 		}
 		drawobject(person_body,glm::vec3(person_x,person_y+jump_speed+12+length_of_cube_base/3,person_z),0,glm::vec3(0,0,1));
 		for (int i = 0; i < 360; ++i)
@@ -1374,7 +1378,7 @@ void initGL (GLFWwindow* window, int width, int height)
 		clr[i]=0;
 	}
 	person_body=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
-	person_leg=createCube(clr,4,4,12);
+	person_leg=createCube1(clr,4,4,-12);
 	person_neck=createCube(clr,3,3,7);
 	for (int i = 0; i <108;i++)
 		clr[i]=0.5;
