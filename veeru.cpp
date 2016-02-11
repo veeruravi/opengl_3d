@@ -343,7 +343,7 @@ double left_button_Pressed=0,right_button_Pressed=0;
 double gameover=0;
 double camera_x_direction=1,camera_z_direction=1,radius_of_camera=300;
 double key=2;
-double top_view=0,reset_view=0;
+double top_view=1,reset_view=0,adventure_view=0,tower_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
 double heights[30][30],empty_cube[182][2],no_of_pits=1;
 double obstacles[182][2],no_of_obstacles=1;
@@ -356,6 +356,7 @@ double person_jump=0,head_view=0,jump_speed=0,jump_direction=1;
 int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0,g_pressed=0,f_pressed=0;
 int l_pressed=0;
 double person_hand_angle=0,hand_angle_speed=5;
+
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
@@ -477,6 +478,7 @@ float formatAngle(float A)
         return A-360.0f;
     return A;
 }
+
 float D2R(float A)
 {
     return (A*M_PI)/180.0f;
@@ -564,22 +566,52 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				normal_view=0;
 				head_view=0;
 				camera_angle=0;
+				reset_view=0;
+				adventure_view=0;
+				tower_view=0;
                 break;
             case GLFW_KEY_R:
 				normal_view=0;
 				top_view=0;
 				head_view=0;
 				camera_angle=0;
+				reset_view=1;
+				adventure_view=0;
+				tower_view=0;
+                break;
+            case GLFW_KEY_U:
+				normal_view=0;
+				top_view=0;
+				head_view=0;
+				camera_angle=0;
+				reset_view=0;
+				adventure_view=1;
+				tower_view=0;
+                break;
+            case GLFW_KEY_Y:
+				normal_view=0;
+				top_view=0;
+				head_view=0;
+				camera_angle=0;
+				reset_view=0;
+				adventure_view=0;
+				tower_view=1;
                 break;
             case GLFW_KEY_N:
             	head_view=0;
             	top_view=0;
 				normal_view=1;
+				reset_view=0;
+				adventure_view=0;
+				tower_view=0;
                 break;
             case GLFW_KEY_H:
 				head_view=1;
 				normal_view=0;
 				top_view=0;
+				reset_view=0;
+				adventure_view=0;
+				tower_view=0;
                 break;
             case GLFW_KEY_W:
             	w_pressed=1;
@@ -601,6 +633,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 		}
 	}
 }
+
 void keyboardChar (GLFWwindow* window, unsigned int key)
 {
 	switch (key) {
@@ -612,6 +645,7 @@ void keyboardChar (GLFWwindow* window, unsigned int key)
 			break;
 	}
 }
+
 void mouseButton (GLFWwindow* window, int button, int action, int mods)
 {
 	switch (button) {
@@ -639,6 +673,7 @@ void mouseButton (GLFWwindow* window, int button, int action, int mods)
             break;
 	}
 }
+
 void reshapeWindow (GLFWwindow* window, int width, int height)
 {
 	int fbwidth=width, fbheight=height;
@@ -662,6 +697,7 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	// Ortho projection for 2D views
 	//Matrices.projection = glm::ortho(-1*(width*2/3)*1.0f, (width*2/3)*1.0f,-1*(height*2/3)*1.0f, (height*2/3)*1.0f, -1000*1.0f, 5000*1.0f);
 }
+
 VAO* createSector(float R,int parts,double clr[6][3])
 {
   float diff=360.0f/parts;
@@ -671,6 +707,7 @@ VAO* createSector(float R,int parts,double clr[6][3])
   GLfloat color_buffer_data[]={clr[0][0],clr[0][1],clr[0][2],clr[1][0],clr[1][1],clr[1][2],clr[2][0],clr[2][1],clr[2][2]};
   return create3DObject(GL_TRIANGLES,3,vertex_buffer_data,color_buffer_data,GL_FILL);
 }
+
 VAO* createRectangle1(double length, double breadth, double clr[6][3])
 {
   // GL3 accepts only Triangles. Quads are not supported
@@ -992,17 +1029,22 @@ VAO* createCube1(GLfloat clr[108],double L,double B,double H)
   	return create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, clr, GL_FILL);
 }
 
-
 void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 {
 	double x,y,z,x1=0,y1=0,z1=0;
-	if (top_view==0)
+	if (reset_view==1)
 	{
 		x=radius_of_camera*cos(camera_angle*M_PI/180);
 		z=-1*radius_of_camera*sin(camera_angle*M_PI/180);
 		y=camera_y;
 	}
-	else
+	if (tower_view==1)
+	{
+		x=350;
+		y=400;
+		z=350;
+	}
+	if (top_view==1)
 	{
 		x=1;//300*cos(camera_angle*M_PI/180);
 		y=400;
@@ -1025,6 +1067,15 @@ void drawobject(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 		x=person_x+(length_of_cube_base)*camera_x_direction*-1;
 		y=person_y+length_of_cube_base;
 		z=person_z+length_of_cube_base*camera_z_direction*-1;
+	}
+	if (adventure_view==1)
+	{
+		x=person_x-50*camera_x_direction*-1;//*camera_x_direction;
+		y=person_y+100;
+		z=person_z-50*camera_z_direction*-1;
+		x1=person_x;
+		y1=person_y;
+		z1=person_z;	
 	}
     Matrices.view = glm::lookAt(glm::vec3(x,y,z), glm::vec3(x1,y1,z1), glm::vec3(0,1,0));
     glm::mat4 VP = Matrices.projection * Matrices.view;
@@ -1054,8 +1105,8 @@ void drawtext(char *s)
 	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
 	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 	GL3Font.font->Render(s);
-	
 }
+
 void draw ()
 {
 	static double prev_x=0,prev_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,prev_z=0;
@@ -1324,6 +1375,7 @@ void draw ()
 	prev_z=person_z;
 	prev_y=person_y;
 }
+
 GLFWwindow* initGLFW (int width, int height)
 {
 	GLFWwindow* window; // window desciptor/handle
@@ -1369,6 +1421,7 @@ GLFWwindow* initGLFW (int width, int height)
 
 	return window;
 }
+
 void initGL (GLFWwindow* window, int width, int height)
 {
 	intialize_base();
