@@ -352,6 +352,7 @@ int height = 700;
 double camera_angle=0,camera_speed=1,camera_y=0;
 double camera_nx=0,camera_ny=0,camera_nz=0,normal_view=0;
 double person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2,person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2,person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,person_shift=5,fall_state=0;
+double person_direction_in_reset_view=0;
 double person_jump=0,head_view=0,jump_speed=0,jump_direction=1;
 int a_pressed=0,d_pressed=0,up_pressed=0,down_pressed=0,right_pressed=0,left_pressed=0,w_pressed=0,s_pressed=0,g_pressed=0,f_pressed=0;
 int l_pressed=0;
@@ -548,12 +549,16 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				break;
 			case GLFW_KEY_RIGHT:
 				right_pressed=1;
+                if (reset_view==1)
+					person_direction_in_reset_view++;
                 break;
 			case GLFW_KEY_L:
             	l_pressed=1;
                 break;
 			case GLFW_KEY_LEFT:
 				left_pressed=1;
+				if (reset_view==1)
+					person_direction_in_reset_view--;
                 break;
 			case GLFW_KEY_DOWN:
 				down_pressed=1;
@@ -1111,6 +1116,7 @@ void draw ()
 {
 	static double prev_x=0,prev_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,prev_z=0;
 	static double x_mouse1,y_mouse1;
+	person_direction_in_reset_view=(int(person_direction_in_reset_view)+4)%4;
 	if (person_x>=(length_of_cube_base*width_of_base+length_of_cube_base)/2||person_x<=-1*((length_of_cube_base*width_of_base+length_of_cube_base)/2))
 		fall_state=1;
 	if (person_z>=(length_of_cube_base*length_of_base+length_of_cube_base)/2||person_z<=-1*((length_of_cube_base*length_of_base+length_of_cube_base)/2))
@@ -1125,33 +1131,67 @@ void draw ()
 		camera_nz-=10;
 		camera_angle-=camera_speed;
 	}
-	if(right_pressed==1)
+	if (reset_view==1)
 	{
-		camera_z_direction=1;
-		person_z-=person_shift;
-		camera_x_direction=0;
-		person_hand_angle+=hand_angle_speed;
+		if (person_direction_in_reset_view==1)
+		{
+			if (up_pressed==1)
+				person_x-=person_shift;
+			camera_x_direction=1;
+			camera_z_direction=0;
+		}
+		if (person_direction_in_reset_view==2)
+		{
+			if (up_pressed==1)
+				person_z-=person_shift;
+			camera_z_direction=1;
+			camera_x_direction=0;
+		}
+		if (person_direction_in_reset_view==3)
+		{
+			if (up_pressed==1)
+				person_x+=person_shift;
+			camera_x_direction=-1;
+			camera_z_direction=0;
+		}
+		if (person_direction_in_reset_view==0)
+		{
+			if (up_pressed==1)
+				person_z+=person_shift;
+			camera_z_direction=-1;
+			camera_x_direction=0;
+		}
 	}
-	if(left_pressed==1)
+	else
 	{
-		camera_x_direction=0;
-		camera_z_direction=-1;
-		person_z+=person_shift;
-		person_hand_angle+=hand_angle_speed;
-	}
-	if(down_pressed==1)
-	{
-		camera_z_direction=0;
-		camera_x_direction=-1;
-		person_x+=person_shift;
-		person_hand_angle+=hand_angle_speed;
-	}
-	if(up_pressed==1)
-	{
-		camera_z_direction=0;
-		camera_x_direction=1;
-		person_x-=person_shift;
-		person_hand_angle+=hand_angle_speed;
+		if(right_pressed==1)
+		{
+			camera_z_direction=1;
+			person_z-=person_shift;
+			camera_x_direction=0;
+			person_hand_angle+=hand_angle_speed;
+		}
+		if(left_pressed==1)
+		{
+			camera_x_direction=0;
+			camera_z_direction=-1;
+			person_z+=person_shift;
+			person_hand_angle+=hand_angle_speed;
+		}
+		if(down_pressed==1)
+		{
+			camera_z_direction=0;
+			camera_x_direction=-1;
+			person_x+=person_shift;
+			person_hand_angle+=hand_angle_speed;
+		}
+		if(up_pressed==1)
+		{
+			camera_z_direction=0;
+			camera_x_direction=1;
+			person_x-=person_shift;
+			person_hand_angle+=hand_angle_speed;
+		}	
 	}
 	if (left_pressed==0&&right_pressed==0&&up_pressed==0&&down_pressed==0)
 		person_hand_angle=0;
