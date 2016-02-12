@@ -342,7 +342,7 @@ double xmousePos,ymousePos,mouse_scroll=0;
 double left_button_Pressed=0,right_button_Pressed=0;
 double gameover=0;
 double camera_x_direction=1,camera_z_direction=1,radius_of_camera=300;
-double key=2;
+double key=0;
 double top_view=1,reset_view=0,adventure_view=0,tower_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
 double heights[30][30],empty_cube[182][2],no_of_pits=1;
@@ -1233,9 +1233,13 @@ void draw ()
 		person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2;
 		person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2;
 		person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base;
-		key=2;
+		key=0;
 		fall_state=0;
 		gameover=0;
+		int x=length_of_base;
+		heights[(x-2)/2][15]=height_of_base+1;
+		heights[13][(x-2)/2]=height_of_base+2;
+		heights[(x-2)/2][13]=height_of_base+1;
 	}
 	if(person_jump==1)
 	{
