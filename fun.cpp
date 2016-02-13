@@ -329,7 +329,7 @@ GLuint createTexture (const char* filename)
  * Customizable functions *
  **************************/
 
-VAO *cube,*person_body,*water,*walls,*person_leg,*person_hand,*person_eye,*person_neck,*person_head,*person_hair,*spike,*image1;
+VAO *cube,*person_body,*water,*walls,*person_leg,*person_hand,*person_eye,*person_neck,*person_head,*person_hair,*spike,*image;
 double wall[5][4],no_of_walls=2;
 /*
 	0-x
@@ -500,18 +500,17 @@ float D2R(float A)
     return (A*M_PI)/180.0f;
 }
 
-VAO* createRectangle (GLuint textureID,double length,double width)
+VAO* createRectangle (GLuint textureID)
 {
 	// GL3 accepts only Triangles. Quads are not supported
 	static const GLfloat vertex_buffer_data [] = {
-		-1*length,-1*width,0, // vertex 1
-		length,-1*width,0, // vertex 2
-		length, width,0, // vertex 3
+		-1.2,-1,0, // vertex 1
+		1.2,-1,0, // vertex 2
+		1.2, 1,0, // vertex 3
 
-		length, width,0, // vertex 3
-		-1*length,width,0, // vertex 2
-		-1*length,-1*width,0 // vertex 1
-		
+		1.2, 1,0, // vertex 3
+		-1.2, 1,0, // vertex 4
+		-1.2,-1,0  // vertex 1
 	};
 
 	static const GLfloat color_buffer_data [] = {
@@ -1638,7 +1637,7 @@ void draw ()
 				spike_y[i][0]-=0.5;
 		}
 	}
-	drawtexture(image1,glm::vec3(200,200,-100),0,glm::vec3(0,1,0));
+	drawobject(image,glm::vec3(200,150,-100),0,glm::vec3(0,1,0));
 	prev_x=person_x;
 	prev_z=person_z;
 	prev_y=person_y;
@@ -1714,7 +1713,7 @@ void initGL (GLFWwindow* window, int width, int height)
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
-	image1 = createRectangle(textureID,10,10);
+	image = createRectangle(textureID);
 	GLfloat clr[108];
 	for (int i = 0; i < 36;i++)
 	{
