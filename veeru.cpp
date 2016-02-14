@@ -329,7 +329,8 @@ GLuint createTexture (const char* filename)
  * Customizable functions *
  **************************/
 
-VAO *cube,*person_body,*water,*walls,*person_leg,*person_hand,*person_eye,*person_neck,*person_head,*person_hair,*spike,*image1;
+VAO *cube,*person_body,*water,*walls,*person_leg,*person_hand,*person_eye,*person_neck,*person_head,*person_hair,*spike,*image1,*arrow_haed,*arrow_tail,*moving_block;
+VAO *coin;
 double wall[5][4],no_of_walls=2;
 /*
 	0-x
@@ -342,7 +343,7 @@ double xmousePos,ymousePos,mouse_scroll=0;
 double left_button_Pressed=0,right_button_Pressed=0;
 double gameover=0;
 double camera_x_direction=1,camera_z_direction=1,radius_of_camera=300;
-double key=3;
+double key=0;
 double top_view=1,reset_view=0,adventure_view=0,tower_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
 double heights[30][30],empty_cube[182][2],no_of_pits=1;
@@ -359,6 +360,10 @@ int l_pressed=0;
 double person_hand_angle=0,hand_angle_speed=5;
 double start1,start2,end1,end2;
 double spike_y[12][2];
+double key_angle=0,arrow_angle=0,arrow_y=0,arrow_y_direction=1;
+double moving_base[30][5],no_of_moving_base=4;
+double person_state;
+double score=0;
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
@@ -397,24 +402,33 @@ void intialize_base()
 		for (int i1 = 0; i1 < width_of_base;i1++)
 		{
 			if(heights[i][i1]!=height_of_base)
-				if ((i!=(x-1)/2 ||(i1!=13&&i1!=15) ) && ( i1!=(x-1)/2 || (i!=13&&i!=15) ))
+				if ((i!=(x-1)/2 ||(i1!=13&&i1!=15&&i1!=16&&i1!=14) ) && ( i1!=(x-1)/2 || (i!=13&&i!=12) ))
 				{
 					obstacles[i2][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
 					obstacles[i2][1]=length_of_cube_base/2.0+(i1-length_of_base/2.0)*length_of_cube_base;
 					i2++;
 				}
 		}
-	obstacles[i2][0]=length_of_cube_base/2.0+(15-width_of_base/2.0)*length_of_cube_base;
-	obstacles[i2][1]=length_of_cube_base/2.0+((x-1)/2-length_of_base/2.0)*length_of_cube_base;
-	i2++;
+	// obstacles[i2][0]=length_of_cube_base/2.0+(15-width_of_base/2.0)*length_of_cube_base;
+	// obstacles[i2][1]=length_of_cube_base/2.0+((x-1)/2-length_of_base/2.0)*length_of_cube_base;
+	// i2++;
 	obstacles[i2][0]=length_of_cube_base/2.0+((x-1)/2-width_of_base/2.0)*length_of_cube_base;
 	obstacles[i2][1]=length_of_cube_base/2.0+(13-length_of_base/2.0)*length_of_cube_base;
+	i2++;
+	obstacles[i2][0]=length_of_cube_base/2.0+((x-1)/2-width_of_base/2.0)*length_of_cube_base;
+	obstacles[i2][1]=length_of_cube_base/2.0+(14-length_of_base/2.0)*length_of_cube_base;
 	i2++;
 	obstacles[i2][0]=length_of_cube_base/2.0+(13-width_of_base/2.0)*length_of_cube_base;
 	obstacles[i2][1]=length_of_cube_base/2.0+((x-1)/2-length_of_base/2.0)*length_of_cube_base;
 	i2++;
+	obstacles[i2][0]=length_of_cube_base/2.0+(12-width_of_base/2.0)*length_of_cube_base;
+	obstacles[i2][1]=length_of_cube_base/2.0+((x-1)/2-length_of_base/2.0)*length_of_cube_base;
+	i2++;
 	obstacles[i2][0]=length_of_cube_base/2.0+((x-1)/2-width_of_base/2.0)*length_of_cube_base;
 	obstacles[i2][1]=length_of_cube_base/2.0+(15-length_of_base/2.0)*length_of_cube_base;
+	i2++;
+	obstacles[i2][0]=length_of_cube_base/2.0+((x-1)/2-width_of_base/2.0)*length_of_cube_base;
+	obstacles[i2][1]=length_of_cube_base/2.0+(16-length_of_base/2.0)*length_of_cube_base;
 	i2++;
 	no_of_obstacles=i2;
 	int k=0;
@@ -484,6 +498,33 @@ void intialize_base()
 	spike_y[11][0]=50;
 	for (int i = 0; i < 12; ++i)
 		spike_y[i][1]=1;
+	moving_base[0][0]=200;
+	moving_base[0][1]=100;
+	moving_base[0][2]=200;
+	moving_base[0][3]=1;
+	moving_base[0][4]=1;
+	moving_base[1][0]=300;
+	moving_base[1][1]=100;
+	moving_base[1][2]=100;
+	moving_base[1][3]=1;
+	moving_base[1][4]=1;
+	moving_base[2][0]=100;
+	moving_base[2][1]=100;
+	moving_base[2][2]=300;
+	moving_base[2][3]=1;
+	moving_base[2][4]=1;
+	moving_base[3][0]=100;
+	moving_base[3][1]=100;
+	moving_base[3][2]=100;
+	moving_base[3][3]=1;
+	moving_base[3][4]=1;
+	moving_base[4][0]=200;
+	moving_base[4][1]=100;
+	moving_base[4][2]=260;
+	moving_base[4][3]=1;
+	moving_base[4][4]=1;
+	no_of_moving_base=5;
+	
 }
 
 float formatAngle(float A)
@@ -688,6 +729,16 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
             case GLFW_KEY_SPACE:
             	person_jump=1;
                 break;
+            case GLFW_KEY_Z:
+            	person_shift-=0.5;
+            	if (person_shift<0)
+            		person_shift=0;
+                break;
+            case GLFW_KEY_X:
+            	person_shift+=0.5;
+            	if (person_shift>8)
+            		person_shift=8;
+                break;
             default:
 				break;
 		}
@@ -768,17 +819,29 @@ VAO* createSector(float R,int parts,double clr[6][3])
   return create3DObject(GL_TRIANGLES,3,vertex_buffer_data,color_buffer_data,GL_FILL);
 }
 
+VAO* createTriangle(float height,float width,double clr[6][3])
+{
+  GLfloat vertex_buffer_data[]={
+  	0.0f,-1.0*height,0.0f,
+  	width,height,0.0f,
+  	-1*width,height,0.0f
+  };
+  
+  GLfloat color_buffer_data[]={clr[0][0],clr[0][1],clr[0][2],clr[1][0],clr[1][1],clr[1][2],clr[2][0],clr[2][1],clr[2][2]};
+  return create3DObject(GL_TRIANGLES,3,vertex_buffer_data,color_buffer_data,GL_FILL);
+}
+
 VAO* createRectangle1(double length, double breadth, double clr[6][3])
 {
   // GL3 accepts only Triangles. Quads are not supported
   const GLfloat vertex_buffer_data [] = {
-    0,0,0, // vertex 1
-    length,0,0, // vertex 2
-    length,breadth,0, // vertex 3
+    length,breadth,0, // vertex 1
+    length,-1*breadth,0, // vertex 2
+    -1*length,breadth,0, // vertex 3
 
-    0, 0,0, // vertex 3
-    0, breadth,0, // vertex 4
-    length,breadth,0  // vertex 1
+	-1*length,-1*breadth,0, // vertex 1
+    length,-1*breadth,0, // vertex 2
+    -1*length,breadth,0, // vertex 3
   };
 
   const GLfloat color_buffer_data [] = {
@@ -1221,6 +1284,7 @@ void draw ()
 {
 	static double prev_x=0,prev_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,prev_z=0;
 	static double x_mouse1,y_mouse1;
+	double var1,var2,var3;
 	person_direction_in_reset_view=(int(person_direction_in_reset_view)+4)%4;
 	if (person_x>=(length_of_cube_base*width_of_base+length_of_cube_base)/2||person_x<=-1*((length_of_cube_base*width_of_base+length_of_cube_base)/2))
 		fall_state=1;
@@ -1318,6 +1382,8 @@ void draw ()
 		y_mouse1=ymousePos;
 		mouse_scroll=1;
 	}
+	if (person_jump==0&&person_state==0&&person_y!=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
+		person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base;
 	if (left_button_Pressed==1&&mouse_scroll==1)
 	{
 		camera_angle+=((x_mouse1-xmousePos)/10);
@@ -1383,16 +1449,19 @@ void draw ()
 	{
 		int x=length_of_base;
 		heights[(x-2)/2][15]=height_of_base;
+		heights[(x-2)/2][16]=height_of_base;
 	}
 	if (key>=2)
 	{
 		int x=length_of_base;
 		heights[13][(x-2)/2]=height_of_base;
+		heights[12][(x-2)/2]=height_of_base;
 	}
 	if (key>=3)
 	{
 		int x=length_of_base;
 		heights[(x-2)/2][13]=height_of_base;
+		heights[(x-2)/2][14]=height_of_base;
 	}
 	glUseProgram (programID);
 
@@ -1485,7 +1554,6 @@ void draw ()
 		}
 	}
 	// cout<<person_x<<"	"<<person_z<<"	"<<empty_cube[0][0]<<"	"<<empty_cube[0][1]<<endl;
-	double var1,var2,var3;
 	for (int i = 0; i < no_of_pits;i++)
 	{
 		var1=person_x-empty_cube[i][0];//-length_of_cube_base/2;
@@ -1501,7 +1569,7 @@ void draw ()
 		// if (var1>-6&&var1<6&&var2>=-6&&var2<6)
 		// 	fall_state=-1;
 	}
-	for (int i = 0; i < no_of_obstacles-key;i++)
+	for (int i = 0; i < no_of_obstacles-2*key;i++)
 	{
 		var1=person_x-obstacles[i][0];//-length_of_cube_base/2;
 	 	var2=person_z-obstacles[i][1];//+length_of_cube_base/2;
@@ -1513,12 +1581,21 @@ void draw ()
 	 	}
 	}
 	//	cout<<person_x<<endl;
-	if (person_x==287.5 && person_z==162.5)
+	if (person_x<=290&&person_x>=280 && person_z<=170&&person_z>=160)
+	{
+		score+=20;
 		key=1;
-	if (person_x==-337.5 && person_z==337.5)
+	}
+	if (person_x>=-345&&person_x<=-335 && person_z<=340&&person_z>=330)
+	{
+		score+=50;
 		key=2;
-	if (person_x==-337.5 && person_z==-337.5)
+	}
+	if (person_x>=-340&&person_x<=-330 && person_z>=-340&&person_z<=-330)
+	{
+		score+=60;
 		key=3;
+	}
 	if (fall_state==1)
 	{
 		person_z=prev_z;
@@ -1630,7 +1707,7 @@ void draw ()
 			}
 			if (spike_y[i][0]>=100)
 				spike_y[i][1]=-1;
-			else if (spike_y[i][0]<=50)
+			else if (spike_y[i][0]<=45)
 				spike_y[i][1]=1;
 			if (spike_y[i][1]==1)
 				spike_y[i][0]+=0.5;
@@ -1638,7 +1715,98 @@ void draw ()
 				spike_y[i][0]-=0.5;
 		}
 	}
-	drawtexture(image1,glm::vec3(200,200,-100),0,glm::vec3(0,1,0));
+	if (key==0)
+	{
+		drawtexture(image1,glm::vec3(287.5,120,162.5),key_angle,glm::vec3(0,1,0));
+		drawobject(arrow_haed,glm::vec3(287.5,150+arrow_y,162.5),arrow_angle,glm::vec3(0,1,0));
+		drawobject(arrow_tail,glm::vec3(287.5,180+arrow_y,162.5),arrow_angle,glm::vec3(0,1,0));
+		arrow_angle+=2;
+		if (arrow_y_direction==1)
+			arrow_y+=0.5;
+		if (arrow_y_direction==-1)
+			arrow_y-=0.5;
+		if (arrow_y>=20)
+			arrow_y_direction=-1;
+		if (arrow_y<=0)
+			arrow_y_direction=1;
+	}
+	else if (key==1)
+	{
+		drawtexture(image1,glm::vec3(-337.5,120,337.5),key_angle,glm::vec3(0,1,0));
+		drawobject(arrow_haed,glm::vec3(-337.5,150+arrow_y,337.5),arrow_angle,glm::vec3(0,1,0));
+		drawobject(arrow_tail,glm::vec3(-337.5,180+arrow_y,337.5),arrow_angle,glm::vec3(0,1,0));
+		arrow_angle+=2;
+		if (arrow_y_direction==1)
+			arrow_y+=0.5;
+		if (arrow_y_direction==-1)
+			arrow_y-=0.5;
+		if (arrow_y>=20)
+			arrow_y_direction=-1;
+		if (arrow_y<=0)
+			arrow_y_direction=1;
+	}
+	else if (key==2)
+	{
+		drawtexture(image1,glm::vec3(-337.5,120,-337.5),key_angle,glm::vec3(0,1,0));
+		drawobject(arrow_haed,glm::vec3(-337.5,150+arrow_y,-337.5),arrow_angle,glm::vec3(0,1,0));
+		drawobject(arrow_tail,glm::vec3(-337.5,180+arrow_y,-337.5),arrow_angle,glm::vec3(0,1,0));
+		arrow_angle+=2;
+		if (arrow_y_direction==1)
+			arrow_y+=0.5;
+		if (arrow_y_direction==-1)
+			arrow_y-=0.5;
+		if (arrow_y>=20)
+			arrow_y_direction=-1;
+		if (arrow_y<=0)
+			arrow_y_direction=1;
+	}
+	if (key>=0)
+	{
+		for (int i = 0; i < no_of_moving_base;i++)
+			{
+				drawobject(moving_block,glm::vec3(moving_base[i][0],moving_base[i][1],moving_base[i][2]),0,glm::vec3(0,1,0));
+				if (moving_base[i][4]==1)
+				{
+					score+=20;
+					drawtexture(coin,glm::vec3(moving_base[i][0],moving_base[i][1]+60,moving_base[i][2]),arrow_angle,glm::vec3(0,1,0));
+				}
+				if (moving_base[i][1]>120)
+					moving_base[i][3]=-1;
+				else if (moving_base[i][1]<=60)
+					moving_base[i][3]=1;
+				if (moving_base[i][3]==1)
+					moving_base[i][1]+=0.5;
+				else
+					moving_base[i][1]-=0.5;
+				var1=person_x-moving_base[i][0];
+				if (var1<0)
+					var1*=-1;
+				var2=person_z-moving_base[i][2];
+				if (var2<0)
+					var2*=-1;
+				var3=person_y-moving_base[i][1]-40;
+				if ((var1>=0&&var1<=25)&&(var2>=0&&var2<=25))
+				{
+					if (var3<=0&&person_state==0)
+					{
+						person_x=prev_x;
+						person_y=prev_y;
+						person_z=prev_z;
+					}
+					else if ((var1<=20||var2<=20)&&var3<=10)
+					{
+						moving_base[i][4]=0;
+						person_state=1;
+					}
+					if (var1>=20||var2>=20)
+						person_state=0;
+					if (person_state==1)
+						person_y=moving_base[i][1]+40+12.5;
+				}
+				cout<<person_y<<"	"<<moving_base[i][1]+40<<endl;
+			}
+	}
+	key_angle+=5;
 	prev_x=person_x;
 	prev_z=person_z;
 	prev_y=person_y;
@@ -1694,7 +1862,7 @@ void initGL (GLFWwindow* window, int width, int height)
 {
 	intialize_base();
 	glActiveTexture(GL_TEXTURE0);
-	GLuint textureID = createTexture("beach2.png");
+	GLuint textureID = createTexture("key.jpg");
 	if(textureID == 0 )
 		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
 	textureProgramID = LoadShaders( "TextureRender.vert", "TextureRender.frag" );
@@ -1714,7 +1882,11 @@ void initGL (GLFWwindow* window, int width, int height)
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
-	image1 = createRectangle(textureID,10,10);
+	image1 = createRectangle(textureID,10,15);
+	textureID = createTexture("coin.jpg");
+	if(textureID == 0 )
+		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
+	coin=createRectangle(textureID,100,150);
 	GLfloat clr[108];
 	for (int i = 0; i < 36;i++)
 	{
@@ -1739,6 +1911,7 @@ void initGL (GLFWwindow* window, int width, int height)
 	{
 		clr[i]=0;
 	}
+	moving_block=createCube(clr,20,20,40);
 	person_body=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
 	person_leg=createCube1(clr,4,4,-12);
 	person_neck=createCube(clr,3,3,7);
@@ -1770,6 +1943,8 @@ void initGL (GLFWwindow* window, int width, int height)
 			clr1[i][i1]=0;
 		}
 	}
+	arrow_haed=createTriangle(15,15,clr1);
+	arrow_tail=createRectangle1(15/2,15,clr1);
 	for (int i = 0; i < 54; i++)
 		clr[i]=0;
 	spike = createPyramid(clr,10,50);
@@ -1800,8 +1975,8 @@ int main (int argc, char** argv)
 	double last_update_time = glfwGetTime(), current_time;
 
 	/* Draw in loop */
-	person_x=100;
-	person_z=-100;
+	// person_x=100;
+	// person_z=-100;
 
 	while (!glfwWindowShouldClose(window)) {
 		//cout<<person_x<<"	drawrawdraw";
