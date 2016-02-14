@@ -12,6 +12,10 @@
 #include <FTGL/ftgl.h>
 #include <GLFW/glfw3.h>
 #include <SOIL/SOIL.h>
+#include <thread>
+#include <ao/ao.h>
+#include <mpg123.h>
+
 
 using namespace std;
 
@@ -343,13 +347,13 @@ double xmousePos,ymousePos,mouse_scroll=0;
 double left_button_Pressed=0,right_button_Pressed=0;
 double gameover=0;
 double camera_x_direction=1,camera_z_direction=1,radius_of_camera=300;
-double key=0;
+double key=3;
 double top_view=1,reset_view=0,adventure_view=0,tower_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
-double heights[30][30],empty_cube[182][2],no_of_pits=1;
+double heights[30][30],empty_cube[300][2],no_of_pits=1;
 double obstacles[182][2],no_of_obstacles=1;
-int width = 1000;
-int height = 700;
+double width = 1000;
+double height = 700;
 double camera_angle=0,camera_speed=1,camera_y=0;
 double camera_nx=0,camera_ny=0,camera_nz=0,normal_view=0;
 double person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2,person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2,person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,person_shift=5,fall_state=0;
@@ -364,6 +368,7 @@ double key_angle=0,arrow_angle=0,arrow_y=0,arrow_y_direction=1;
 double moving_base[30][5],no_of_moving_base=4;
 double person_state;
 double score=0;
+int reshapeWindow_val=1,gameend=0;
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
@@ -467,6 +472,14 @@ void intialize_base()
 		empty_cube[k][1]=length_of_cube_base/2.0+(12-length_of_base/2.0)*length_of_cube_base;
 		k++;
 	}
+	for (int i1 = 17; i1 <23 ; i1++)
+		for (int i = 15; i < 29; i++)
+		{
+			heights[i1][i]=0;
+			empty_cube[k][0]=length_of_cube_base/2.0+(i1-width_of_base/2.0)*length_of_cube_base;
+			empty_cube[k][1]=length_of_cube_base/2.0+(i-length_of_base/2.0)*length_of_cube_base;
+			k++;
+		}
 	heights[20][21]=0;
 	empty_cube[k][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
 	empty_cube[k][1]=length_of_cube_base/2.0+(21-length_of_base/2.0)*length_of_cube_base;
@@ -498,29 +511,29 @@ void intialize_base()
 	spike_y[11][0]=50;
 	for (int i = 0; i < 12; ++i)
 		spike_y[i][1]=1;
-	moving_base[0][0]=200;
+	moving_base[0][0]=180;
 	moving_base[0][1]=100;
 	moving_base[0][2]=200;
 	moving_base[0][3]=1;
 	moving_base[0][4]=1;
-	moving_base[1][0]=300;
+	moving_base[1][0]=125;
 	moving_base[1][1]=100;
-	moving_base[1][2]=100;
+	moving_base[1][2]=250;
 	moving_base[1][3]=1;
 	moving_base[1][4]=1;
-	moving_base[2][0]=100;
+	moving_base[2][0]=125;
 	moving_base[2][1]=100;
-	moving_base[2][2]=300;
+	moving_base[2][2]=200;
 	moving_base[2][3]=1;
 	moving_base[2][4]=1;
-	moving_base[3][0]=100;
+	moving_base[3][0]=125;
 	moving_base[3][1]=100;
-	moving_base[3][2]=100;
+	moving_base[3][2]=150;
 	moving_base[3][3]=1;
 	moving_base[3][4]=1;
-	moving_base[4][0]=200;
+	moving_base[4][0]=70;
 	moving_base[4][1]=100;
-	moving_base[4][2]=260;
+	moving_base[4][2]=200;
 	moving_base[4][3]=1;
 	moving_base[4][4]=1;
 	no_of_moving_base=5;
@@ -580,6 +593,52 @@ VAO* createRectangle (GLuint textureID,double length,double width)
 	return create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
 }
 
+void *play_audio(string audioFile)
+{
+    mpg123_handle *mh;
+    unsigned char *buffer;
+    size_t buffer_size;
+    size_t done;
+    int err;
+
+    int driver;
+    ao_device *dev;
+
+    ao_sample_format format;
+    int channels, encoding;
+    long rate;
+
+    /* initializations */
+    ao_initialize();
+    driver = ao_default_driver_id();
+    mpg123_init();
+    mh = mpg123_new(NULL, &err);
+    buffer_size = mpg123_outblock(mh);
+    buffer = (unsigned char*) malloc(buffer_size * sizeof(unsigned char));
+
+    /* open the file and get the decoding format */
+    mpg123_open(mh, &audioFile[0]);
+    mpg123_getformat(mh, &rate, &channels, &encoding);
+
+    /* set the output format and open the output device */
+    format.bits = mpg123_encsize(encoding) * 8;
+    format.rate = rate;
+    format.channels = channels;
+    format.byte_format = AO_FMT_NATIVE;
+    format.matrix = 0;
+    dev = ao_open_live(driver, &format, NULL);
+
+    /* decode and play */
+    char *p =(char *)buffer;
+    while (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK)
+        ao_play(dev, p, done);
+
+    /* clean up */
+    free(buffer);
+    ao_close(dev);
+    mpg123_close(mh);
+    mpg123_delete(mh);
+}
 
 void mousescroll(GLFWwindow* window, double xoffset, double yoffset)
 {
@@ -729,6 +788,9 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
             case GLFW_KEY_SPACE:
             	person_jump=1;
                 break;
+            case GLFW_KEY_P:
+            	thread(play_audio,"sound.mp3").detach();
+                break;
             case GLFW_KEY_Z:
             	person_shift-=0.5;
             	if (person_shift<0)
@@ -803,8 +865,7 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	//gluPerspective (fov, (GLfloat) width / (GLfloat) height, 0.1, 5000.0f);
 	// Store the projection matrix in a variable for future use
 	// Perspective projection for 3D views
-	 Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 5000.0f);
-
+	Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 5000.0f);
 	// Ortho projection for 2D views
 	//Matrices.projection = glm::ortho(-1*(width*2/3)*1.0f, (width*2/3)*1.0f,-1*(height*2/3)*1.0f, (height*2/3)*1.0f, -1000*1.0f, 5000*1.0f);
 }
@@ -1262,8 +1323,9 @@ void drawtexture(VAO* obj,glm::vec3 trans,float angle,glm::vec3 rotat)
 	draw3DTexturedObject(obj);
 }
 
-void drawtext(char *s)
+void drawtext(char *s,glm::vec3 trans)
 {
+	glUseProgram(fontProgramID);
 	static int fontScale = 1;
 	float fontScaleValue = 0.75 + 0.25*sinf(fontScale*M_PI/180.0f);
 	fontScale = (fontScale + 1) % 360;
@@ -1271,8 +1333,9 @@ void drawtext(char *s)
 	Matrices.view = glm::lookAt(glm::vec3(0,0,3), glm::vec3(0,0,0), glm::vec3(0,1,0)); // Fixed camera for 2D (ortho) in XY plane
 	glm::mat4 MVP;
 	Matrices.model = glm::mat4(1.0f);
-	glm::mat4 translateText = glm::translate(glm::vec3(-3,2,0));
-	glm::mat4 scaleText = glm::scale(glm::vec3(fontScaleValue,fontScaleValue,fontScaleValue));
+	double x=0;
+	glm::mat4 translateText = glm::translate(glm::vec3(width/2,10,height/2));
+	glm::mat4 scaleText = glm::scale(glm::vec3(0.5,0.5,0.5));
 	Matrices.model *= (translateText * scaleText);
 	MVP = Matrices.projection * Matrices.view * Matrices.model;
 	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
@@ -1422,7 +1485,10 @@ void draw ()
 		int x=length_of_base;
 		heights[(x-2)/2][15]=height_of_base+1;
 		heights[13][(x-2)/2]=height_of_base+2;
+		heights[12][(x-2)/2]=height_of_base+2;
 		heights[(x-2)/2][13]=height_of_base+1;
+		heights[(x-2)/2][14]=height_of_base+1;
+		heights[(x-2)/2][16]=height_of_base+1;
 	}
 	if(person_jump==1)
 	{
@@ -1596,6 +1662,11 @@ void draw ()
 		score+=60;
 		key=3;
 	}
+	if (person_x<=340&&person_x>=330 && person_z>=-340&&person_z<=-330)
+	{
+		score+=60;
+		gameend=1;
+	}
 	if (fall_state==1)
 	{
 		person_z=prev_z;
@@ -1760,6 +1831,21 @@ void draw ()
 		if (arrow_y<=0)
 			arrow_y_direction=1;
 	}
+	else if (key==3)
+	{
+		drawtexture(image1,glm::vec3(340.0,120,-340),key_angle,glm::vec3(0,1,0));
+		drawobject(arrow_haed,glm::vec3(340,150+arrow_y,-340),arrow_angle,glm::vec3(0,1,0));
+		drawobject(arrow_tail,glm::vec3(340,180+arrow_y,-340),arrow_angle,glm::vec3(0,1,0));
+		arrow_angle+=2;
+		if (arrow_y_direction==1)
+			arrow_y+=0.5;
+		if (arrow_y_direction==-1)
+			arrow_y-=0.5;
+		if (arrow_y>=20)
+			arrow_y_direction=-1;
+		if (arrow_y<=0)
+			arrow_y_direction=1;
+	}
 	if (key>=0)
 	{
 		for (int i = 0; i < no_of_moving_base;i++)
@@ -1793,19 +1879,37 @@ void draw ()
 						person_y=prev_y;
 						person_z=prev_z;
 					}
-					else if ((var1<=20||var2<=20)&&var3<=10)
+					else if ((var1<=20&&var2<=20)&&var3<=12.5)
 					{
 						moving_base[i][4]=0;
 						person_state=1;
 					}
-					if (var1>=20||var2>=20)
+					if (var1>20||var2>20)
 						person_state=0;
 					if (person_state==1)
 						person_y=moving_base[i][1]+40+12.5;
 				}
-				cout<<person_y<<"	"<<moving_base[i][1]+40<<endl;
+				//cout<<person_y<<"	"<<moving_base[i][1]+40<<endl;
 			}
 	}
+	// glm::vec3 fontColor = glm::vec3(0,0,0);
+	// glUseProgram(fontProgramID);
+	// Matrices.view = glm::lookAt(glm::vec3(0,0,3), glm::vec3(0,0,0), glm::vec3(0,1,0)); // Fixed camera for 2D (ortho) in XY plane
+	// glm::mat4 MVP;
+	// // Transform the text
+	// Matrices.model = glm::mat4(1.0f);
+	// glm::mat4 translateText = glm::translate(glm::vec3(200,130,200));
+	// glm::mat4 scaleText = glm::scale(glm::vec3(500,500,500));
+	// Matrices.model *= (translateText * scaleText);
+	// MVP = Matrices.projection * Matrices.view * Matrices.model;
+	// // send font's MVP and font color to fond shaders
+	// glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+	// glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
+
+	// // Render font
+	// GL3Font.font->Render("SCORE:");
+
+
 	key_angle+=5;
 	prev_x=person_x;
 	prev_z=person_z;
@@ -1996,9 +2100,12 @@ int main (int argc, char** argv)
 			// do something every 0.5 seconds ..
 			last_update_time = current_time;
 		}
-		if (person_y<=0)
+		if (person_y<length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
+			fall_state=1;
+		if (person_y<=50)
 			gameover=1;
-		//cout<<person_x<<"	"<<person_z<<endl;
+		if (gameend==1)
+			break;
 	}
 
 	glfwTerminate();
