@@ -366,7 +366,7 @@ double start1,start2,end1,end2;
 double spike_y[12][2];
 double key_angle=0,arrow_angle=0,arrow_y=0,arrow_y_direction=1;
 double moving_base[30][5],no_of_moving_base=4;
-double person_state;
+double person_state,person_health=10;
 double score=0;
 int reshapeWindow_val=1,gameend=0;
 void intialize_base()
@@ -1446,7 +1446,12 @@ void draw ()
 		mouse_scroll=1;
 	}
 	if (person_jump==0&&person_state==0&&person_y!=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
+	{
+		var1=(person_y-length_of_cube_base*3/2.0+(height_of_base-2))*length_of_cube_base;
+		int var4=var1;
+		person_health-=(var4/1000);
 		person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base;
+	}
 	if (left_button_Pressed==1&&mouse_scroll==1)
 	{
 		camera_angle+=((x_mouse1-xmousePos)/10);
@@ -1744,6 +1749,7 @@ void draw ()
 		 		person_x=prev_x;
 		 		if (var2>0&&var2<length_of_cube_base)
 			 		wall[i][3]*=-1;		
+			 	person_health-=0.1;
 			 	gameover=1;
 			}
 			drawobject(walls,glm::vec3(wall[i][0],length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,wall[i][1]),0,glm::vec3(0,0,1));
@@ -2106,6 +2112,9 @@ int main (int argc, char** argv)
 			gameover=1;
 		if (gameend==1)
 			break;
+		cout<<person_health<<endl;
+		//cout<<score<<endl;
+		//cout<<person_y<<"	"<<length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base<<endl;
 	}
 
 	glfwTerminate();
