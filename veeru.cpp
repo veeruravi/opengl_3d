@@ -334,7 +334,7 @@ GLuint createTexture (const char* filename)
  **************************/
 
 VAO *cube,*person_body,*water,*walls,*person_leg,*person_hand,*person_eye,*person_neck,*person_head,*person_hair,*spike,*image1,*arrow_haed,*arrow_tail,*moving_block;
-VAO *coin,*background,*boat1,*boat2,*boat3,*boat4,*health,*score_cube_ver,*score_cube_hor;
+VAO *coin,*background,*boat1,*boat2,*boat3,*boat4,*health,*score_cube_ver,*score_cube_hor,*fire;
 double boat_angle=0;
 double wall[5][4],no_of_walls=2;
 /*
@@ -348,10 +348,10 @@ double xmousePos,ymousePos,mouse_scroll=0;
 double left_button_Pressed=0,right_button_Pressed=0;
 double gameover=0;
 double camera_x_direction=1,camera_z_direction=1,radius_of_camera=300;
-double key=3;
+double key=1;
 double top_view=1,reset_view=0,adventure_view=0,tower_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
-double heights[30][30],empty_cube[300][2],no_of_pits=1;
+double heights[30][30],empty_cube[300][2],no_of_pits=0;
 double obstacles[182][2],no_of_obstacles=1;
 double width = 1000;
 double height = 700;
@@ -461,17 +461,17 @@ void intialize_base()
 		{
 			if (i!=7&&l!=22)
 			{
-				heights[i][l]=0;
-				empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
-				empty_cube[k][1]=length_of_cube_base/2.0+(l-length_of_base/2.0)*length_of_cube_base;
-				k++;
+				heights[i][l]=4;
+				// empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+				// empty_cube[k][1]=length_of_cube_base/2.0+(l-length_of_base/2.0)*length_of_cube_base;
+				// k++;
 			}
 			if ((i==7||i==6||i==5)&&(l==22||l==23||l==21))
 			{
-				heights[i][l]=0;
-				empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
-				empty_cube[k][1]=length_of_cube_base/2.0+(l-length_of_base/2.0)*length_of_cube_base;
-				k++;
+				heights[i][l]=4;
+				// empty_cube[k][0]=length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base;
+				// empty_cube[k][1]=length_of_cube_base/2.0+(l-length_of_base/2.0)*length_of_cube_base;
+				// k++;
 			}
 		}
 	}
@@ -493,15 +493,16 @@ void intialize_base()
 	for (int i1 = 17; i1 <23 ; i1++)
 		for (int i = 15; i < 29; i++)
 		{
-			heights[i1][i]=0;
-			empty_cube[k][0]=length_of_cube_base/2.0+(i1-width_of_base/2.0)*length_of_cube_base;
-			empty_cube[k][1]=length_of_cube_base/2.0+(i-length_of_base/2.0)*length_of_cube_base;
-			k++;
+			heights[i1][i]=4;
+			// empty_cube[k][0]=length_of_cube_base/2.0+(i1-width_of_base/2.0)*length_of_cube_base;
+			// empty_cube[k][1]=length_of_cube_base/2.0+(i-length_of_base/2.0)*length_of_cube_base;
+			// k++;
 		}
-	heights[20][21]=0;
-	empty_cube[k][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
-	empty_cube[k][1]=length_of_cube_base/2.0+(21-length_of_base/2.0)*length_of_cube_base;
-	no_of_pits=k+1;
+	// heights[20][21]=0;
+	// empty_cube[k][0]=length_of_cube_base/2.0+(20-width_of_base/2.0)*length_of_cube_base;
+	// empty_cube[k][1]=length_of_cube_base/2.0+(21-length_of_base/2.0)*length_of_cube_base;
+	no_of_pits=k;
+	cout<<no_of_pits<<endl;
 	wall[0][0]=-300;
 	wall[0][1]=length_of_cube_base/2.0+(4-length_of_base/2.0)*length_of_cube_base;
 	wall[0][2]=length_of_cube_base*2;
@@ -1363,6 +1364,8 @@ void drawtext(char *s,glm::vec3 trans)
 
 void draw ()
 {
+	// if (person_jump==0)
+	// 	person_y-=1;
 	static double prev_x=0,prev_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base,prev_z=0;
 	static double x_mouse1,y_mouse1;
 	double var1,var2,var3;
@@ -1463,13 +1466,15 @@ void draw ()
 		y_mouse1=ymousePos;
 		mouse_scroll=1;
 	}
-	if (person_jump==0&&person_state==0&&person_y!=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
-	{
-		var1=(person_y-length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base);
-		int var4=var1;
-		person_health-=(var4/15);
-		person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base;
-	}
+	if (person_y+jump_speed<112.5)
+		person_health-=0.1;
+	// if (person_jump==0&&person_state==0&&person_y!=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
+	// {
+	// 	var1=(person_y-length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base);
+	// 	int var4=var1;
+	// 	person_health-=(var4/15);
+	// 	person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base;
+	// }
 	if (left_button_Pressed==1&&mouse_scroll==1)
 	{
 		camera_angle+=((x_mouse1-xmousePos)/10);
@@ -1497,7 +1502,7 @@ void draw ()
 		camera_ny+=10;
 	if (f_pressed==1)
 		camera_ny-=10;
-	if (l_pressed==1 || person_health<=0)
+	if (l_pressed==1 || person_health<=0||gameover==1)
 	{
 		person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2;
 		person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2;
@@ -1517,8 +1522,8 @@ void draw ()
 	if(person_jump==1)
 	{
 		if (jump_direction==1)
-			jump_speed+=1;
-		if (jump_speed>length_of_cube_base||jump_direction==-1)
+			jump_speed+=1.5;
+		if (jump_speed>length_of_cube_base+10||jump_direction==-1)
 		{
 			jump_speed-=1;
 			jump_direction=-1;
@@ -1562,20 +1567,58 @@ void draw ()
 		end1=30;
 		end2=30;
 		for (int i2 = start1; i2 <end1;i2++)
-		for (int i = start2; i <end2;i++)
-		{
-			for (int i1 = 0; i1<heights[i2][i];i1++)
-				drawobject(cube,glm::vec3(
-					length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
-					length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
-					length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
-			if (heights[i2][i]==0)
-				for (int i1 = 0; i1 < height_of_base-1;i1++)
-					drawobject(water,glm::vec3(
+			for (int i = start2; i <end2;i++)
+			{
+				for (int i1 = 0; i1<heights[i2][i];i1++)
+					drawobject(cube,glm::vec3(
 						length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
 						length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
 						length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
-		}
+				if (heights[i2][i]==4)
+					drawobject(water,glm::vec3(
+							length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
+							length_of_cube_base/2.0+(height_of_base-3)*length_of_cube_base,
+							length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
+				var1=person_x-(length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base);
+				if (var1<0)
+					var1*=-1;
+				var3=person_z-(length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base);
+				if (var3<0)
+					var3*=-1;
+				var2=person_y-(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base);
+				if (var1<length_of_cube_base/2&&var3<length_of_cube_base/2)
+				{
+					cout<<person_y+jump_speed<<"	"<<var2<<endl;
+				}
+					
+				// {
+				// 	if (person_y+jump_speed<(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base)+length_of_cube_base/2)
+				// 		person_y=(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base)+length_of_cube_base/2-jump_speed;
+				// 	cout<<person_y<<"	"<<jump_speed<<"	"<<(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base)<<endl;
+				// }
+				if (var1<length_of_cube_base/2&&var3<length_of_cube_base/2&&var2>0)
+				{
+					person_y-=1;
+					person_health-=0.15;
+				}
+				else if (var1<length_of_cube_base/2&&var3<length_of_cube_base/2&&var2<0)
+				{
+					if (person_jump==0)
+					{
+						person_y=prev_y;
+						person_x=prev_x;
+						person_z=prev_z;
+						cout<<"inif"<<endl;
+					}
+					else
+					{
+						person_y=(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base)+length_of_cube_base/2+0.5;
+						person_jump=0;
+						jump_direction=1;
+						jump_speed=0;
+					}
+				}
+			}
 	}
 	if (key>=1)
 	{
@@ -1584,20 +1627,59 @@ void draw ()
 		end1=15;
 		end2=30;
 		for (int i2 = start1; i2 <end1;i2++)
-		for (int i = start2; i <end2;i++)
-		{
-			for (int i1 = 0; i1<heights[i2][i];i1++)
-				drawobject(cube,glm::vec3(
-					length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
-					length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
-					length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
-			if (heights[i2][i]==0)
-				for (int i1 = 0; i1 < height_of_base-1;i1++)
-					drawobject(water,glm::vec3(
+			for (int i = start2; i <end2;i++)
+			{
+				for (int i1 = 0; i1<heights[i2][i];i1++)
+					drawobject(cube,glm::vec3(
 						length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
 						length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
 						length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
-		}
+				if (heights[i2][i]==4)
+					for (int i1 = 0; i1 < height_of_base-1;i1++)
+						drawobject(water,glm::vec3(
+							length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
+							length_of_cube_base/2.0+(height_of_base-3)*length_of_cube_base,
+							length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
+				var1=person_x-(length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base);
+				if (var1<0)
+					var1*=-1;
+				var3=person_z-(length_of_cube_base/2.0+(i-width_of_base/2.0)*length_of_cube_base);
+				if (var3<0)
+					var3*=-1;
+				var2=person_y-(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base);
+				if (var1<length_of_cube_base/2&&var3<length_of_cube_base/2)
+				{
+					cout<<person_y+jump_speed<<"	"<<var2<<endl;
+				}
+					
+				// {
+				// 	if (person_y+jump_speed<(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base)+length_of_cube_base/2)
+				// 		person_y=(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base)+length_of_cube_base/2-jump_speed;
+				// 	cout<<person_y<<"	"<<jump_speed<<"	"<<(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base)<<endl;
+				// }
+				if (var1<length_of_cube_base/2&&var3<length_of_cube_base/2&&var2>0)
+				{
+					person_y-=1;
+					person_health-=0.15;
+				}
+				else if (var1<length_of_cube_base/2&&var3<length_of_cube_base/2&&var2<0)
+				{
+					if (person_jump==0)
+					{
+						person_y=prev_y;
+						person_x=prev_x;
+						person_z=prev_z;
+						cout<<"inif"<<endl;
+					}
+					else
+					{
+						person_y=(length_of_cube_base/2.0+(heights[i2][i]-1)*length_of_cube_base)+length_of_cube_base/2+0.5;
+						person_jump=0;
+						jump_direction=1;
+						jump_speed=0;
+					}
+				}
+			}
 	}
 	if (key>=2)
 	{
@@ -1606,20 +1688,20 @@ void draw ()
 		end1=15;
 		end2=15;
 		for (int i2 = start1; i2 <end1;i2++)
-		for (int i = start2; i <end2;i++)
-		{
-			for (int i1 = 0; i1<heights[i2][i];i1++)
-				drawobject(cube,glm::vec3(
-					length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
-					length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
-					length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
-			if (heights[i2][i]==0)
-				for (int i1 = 0; i1 < height_of_base-1;i1++)
-					drawobject(water,glm::vec3(
+			for (int i = start2; i <end2;i++)
+			{
+				for (int i1 = 0; i1<heights[i2][i];i1++)
+					drawobject(cube,glm::vec3(
 						length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
 						length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
 						length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
-		}
+				if (heights[i2][i]==0)
+					for (int i1 = 0; i1 < height_of_base-1;i1++)
+						drawobject(fire,glm::vec3(
+							length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
+							length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
+							length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
+			}
 	}
 	if(key>=3)
 	{
@@ -1628,20 +1710,20 @@ void draw ()
 		end1=30;
 		end2=15;
 		for (int i2 = start1; i2 <end1;i2++)
-		for (int i = start2; i <end2;i++)
-		{
-			for (int i1 = 0; i1<heights[i2][i];i1++)
-				drawobject(cube,glm::vec3(
-					length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
-					length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
-					length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
-			if (heights[i2][i]==0)
-				for (int i1 = 0; i1 < height_of_base-1;i1++)
-					drawobject(water,glm::vec3(
+			for (int i = start2; i <end2;i++)
+			{
+				for (int i1 = 0; i1<heights[i2][i];i1++)
+					drawobject(cube,glm::vec3(
 						length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
 						length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
 						length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
-		}
+				if (heights[i2][i]==0)
+					for (int i1 = 0; i1 < height_of_base-1;i1++)
+						drawobject(water,glm::vec3(
+							length_of_cube_base/2.0+(i2-length_of_base/2.0)*length_of_cube_base,
+							length_of_cube_base/2.0+(i1-1)*length_of_cube_base,
+							length_of_cube_base/2.0+((i-width_of_base/2.0)*length_of_cube_base)),0,glm::vec3(0,0,1));
+			}
 	}
 	// cout<<person_x<<"	"<<person_z<<"	"<<empty_cube[0][0]<<"	"<<empty_cube[0][1]<<endl;
 	if (person_state==0)
@@ -1672,22 +1754,22 @@ void draw ()
 	 	}
 	}
 	//	cout<<person_x<<endl;
-	if (person_x<=290&&person_x>=280 && person_z<=170&&person_z>=160)
+	if (person_x<=290&&person_x>=280 && person_z<=170&&person_z>=160&&key==0)
 	{
 		score+=20;
 		key=1;
 	}
-	if (person_x>=-345&&person_x<=-335 && person_z<=340&&person_z>=330)
+	if (person_x>=-345&&person_x<=-335 && person_z<=340&&person_z>=330&&key==1)
 	{
 		score+=50;
 		key=2;
 	}
-	if (person_x>=-340&&person_x<=-330 && person_z>=-340&&person_z<=-330)
+	if (person_x>=-340&&person_x<=-330 && person_z>=-340&&person_z<=-330&&key==2)
 	{
 		score+=60;
 		key=3;
 	}
-	if (person_x<=340&&person_x>=330 && person_z>=-340&&person_z<=-330)
+	if (person_x<=340&&person_x>=330 && person_z>=-340&&person_z<=-330&&key==3)
 	{
 		score+=60;
 		gameend=1;
@@ -1698,6 +1780,8 @@ void draw ()
 	 	person_y=prev_y;
 	 	person_x=prev_x;
 		person_y-=1;
+		if (person_y<0)
+			gameover=1;
 		//cout<<"fall_state==1"<<endl;
 	}
 	if (gameover==0)
@@ -1705,7 +1789,7 @@ void draw ()
 		GLfloat clr[108];
 		for (int i = 0; i <36;i++)
 		{
-			clr[3*i]=person_health/100;
+			clr[3*i]=1;
 			clr[3*i+2]=0;
 			clr[3*i+1]=0;
 		}
@@ -1721,7 +1805,7 @@ void draw ()
 			drawobject(person_leg,glm::vec3(person_x+6,person_y+jump_speed+10,person_z),-1*person_hand_angle,glm::vec3(1,0,0));
 			drawobject(person_leg,glm::vec3(person_x-6,person_y+jump_speed+10,person_z),person_hand_angle,glm::vec3(1,0,0));
 		}
-		drawobject(health,glm::vec3(person_x,person_y+100,person_z),0,glm::vec3(0,1,0));
+		drawobject(health,glm::vec3(person_x,person_y+100+jump_speed,person_z),0,glm::vec3(0,1,0));
 		drawobject(person_body,glm::vec3(person_x,person_y+jump_speed+12+length_of_cube_base/3,person_z),0,glm::vec3(0,0,1));
 		for (int i = 0; i < 360; ++i)
 			drawobject(person_neck,glm::vec3(person_x,person_y+jump_speed+12+length_of_cube_base,person_z),i,glm::vec3(0,1,0));
@@ -2131,6 +2215,13 @@ void initGL (GLFWwindow* window, int width, int height)
 	}
 	walls=createCube(clr,length_of_cube_base*2,length_of_cube_base/2,length_of_cube_base/2);
 	water=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,(length_of_cube_base*5)/6);
+	for (int i = 0; i <36;i++)
+	{
+		clr[3*i]=1;
+		clr[3*i+1]=0;
+		clr[3*i+2]=0;
+	}
+	fire=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
 	double clr1[6][3];
 	for (int i = 0; i < 6;i++)
 	{
@@ -2199,19 +2290,20 @@ int main (int argc, char** argv)
 			// do something every 0.5 seconds ..
 			last_update_time = current_time;
 		}
-		if (person_y<length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base-10)
-		{
-			//cout<<"here"<<endl;
-			fall_state=1;
-		}
-		if (person_y<=50)
-			gameover=1;
+		// if (person_y<0)//length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base-10)
+		// {
+		// 	//cout<<"here"<<endl;
+		// 	fall_state=1;
+		// }
+		// if (person_y<=50)
+		// 	gameover=1;
 		if (gameend==1)
 			break;
 		//cout<<person_health<<endl;
 		cout<<score<<endl;
 		//cout<<person_y<<"	"<<length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base<<endl;
 		//cout<<person_jump<<"	"<<person_state<<endl;
+		
 	}
 
 	glfwTerminate();
