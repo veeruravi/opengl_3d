@@ -334,7 +334,8 @@ GLuint createTexture (const char* filename)
  **************************/
 
 VAO *cube,*person_body,*water,*walls,*person_leg,*person_hand,*person_eye,*person_neck,*person_head,*person_hair,*spike,*image1,*arrow_haed,*arrow_tail,*moving_block;
-VAO *coin;
+VAO *coin,*background,*boat1,*boat2,*boat3,*boat4,*health,*score_cube_ver,*score_cube_hor;
+double boat_angle=0;
 double wall[5][4],no_of_walls=2;
 /*
 	0-x
@@ -366,9 +367,26 @@ double start1,start2,end1,end2;
 double spike_y[12][2];
 double key_angle=0,arrow_angle=0,arrow_y=0,arrow_y_direction=1;
 double moving_base[30][5],no_of_moving_base=4;
-double person_state,person_health=10;
+double person_state,person_health=100;
 double score=0;
 int reshapeWindow_val=1,gameend=0;
+
+double a[10][7];
+void intialize_a()
+{
+    a[0][0]=1;a[0][1]=1;a[0][2]=1;a[0][3]=1;a[0][4]=1;a[0][5]=1;a[0][6]=0;
+    a[1][0]=0;a[1][1]=1;a[1][2]=1;a[1][3]=0;a[1][4]=0;a[1][5]=0;a[1][6]=0;
+    a[2][0]=1;a[2][1]=1;a[2][2]=0;a[2][3]=1;a[2][4]=1;a[2][5]=0;a[2][6]=1;
+    a[3][0]=1;a[3][1]=1;a[3][2]=1;a[3][3]=1;a[3][4]=0;a[3][5]=0;a[3][6]=1;
+    a[4][0]=0;a[4][1]=1;a[4][2]=1;a[4][3]=0;a[4][4]=0;a[4][5]=1;a[4][6]=1;
+    a[5][0]=1;a[5][1]=0;a[5][2]=1;a[5][3]=1;a[5][4]=0;a[5][5]=1;a[5][6]=1;
+    a[6][0]=1;a[6][1]=0;a[6][2]=1;a[6][3]=1;a[6][4]=1;a[6][5]=1;a[6][6]=1;
+    a[7][0]=1;a[7][1]=1;a[7][2]=1;a[7][3]=0;a[7][4]=0;a[7][5]=0;a[7][6]=0;
+    a[8][0]=1;a[8][1]=1;a[8][2]=1;a[8][3]=1;a[8][4]=1;a[8][5]=1;a[8][6]=1;
+    a[9][0]=1;a[9][1]=1;a[9][2]=1;a[9][3]=1;a[9][4]=0;a[9][5]=1;a[9][6]=1;
+}
+
+
 void intialize_base()
 {
 	for (int i = 0; i < length_of_base;i++)
@@ -511,7 +529,7 @@ void intialize_base()
 	spike_y[11][0]=50;
 	for (int i = 0; i < 12; ++i)
 		spike_y[i][1]=1;
-	moving_base[0][0]=180;
+	moving_base[0][0]=185;
 	moving_base[0][1]=100;
 	moving_base[0][2]=200;
 	moving_base[0][3]=1;
@@ -531,7 +549,7 @@ void intialize_base()
 	moving_base[3][2]=150;
 	moving_base[3][3]=1;
 	moving_base[3][4]=1;
-	moving_base[4][0]=70;
+	moving_base[4][0]=65;
 	moving_base[4][1]=100;
 	moving_base[4][2]=200;
 	moving_base[4][3]=1;
@@ -1447,9 +1465,9 @@ void draw ()
 	}
 	if (person_jump==0&&person_state==0&&person_y!=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
 	{
-		var1=(person_y-length_of_cube_base*3/2.0+(height_of_base-2))*length_of_cube_base;
+		var1=(person_y-length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base);
 		int var4=var1;
-		person_health-=(var4/1000);
+		person_health-=(var4/15);
 		person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base;
 	}
 	if (left_button_Pressed==1&&mouse_scroll==1)
@@ -1479,13 +1497,14 @@ void draw ()
 		camera_ny+=10;
 	if (f_pressed==1)
 		camera_ny-=10;
-	if (l_pressed==1)
+	if (l_pressed==1 || person_health<=0)
 	{
 		person_x=(length_of_cube_base*length_of_base-3*length_of_cube_base)/2;
 		person_z=(length_of_cube_base*width_of_base-3*length_of_cube_base)/2;
 		person_y=length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base;
 		key=0;
 		fall_state=0;
+		person_health=100;
 		gameover=0;
 		int x=length_of_base;
 		heights[(x-2)/2][15]=height_of_base+1;
@@ -1625,21 +1644,22 @@ void draw ()
 		}
 	}
 	// cout<<person_x<<"	"<<person_z<<"	"<<empty_cube[0][0]<<"	"<<empty_cube[0][1]<<endl;
-	for (int i = 0; i < no_of_pits;i++)
-	{
-		var1=person_x-empty_cube[i][0];//-length_of_cube_base/2;
-		var2=person_z-empty_cube[i][1];//+length_of_cube_base/2;
-		if (person_y+jump_speed==length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
-			if (var1<length_of_cube_base/2 && var1>-1*length_of_cube_base/2 && var2<length_of_cube_base/2 && var2>-1*length_of_cube_base/2)
-			{
-				//cout<<i<<"	"<<person_x<<"	"<<person_z<<"	"<<empty_cube[i][0]<<"	"<<empty_cube[i][1]<<endl;
-				fall_state=1;
-			}
-		// if (i==0)
-		// 	cout<<i<<"	"<<person_x<<"	"<<person_z<<"	"<<empty_cube[i][0]<<"	"<<empty_cube[i][1]<<var1<<"	"<<var2<<endl;
-		// if (var1>-6&&var1<6&&var2>=-6&&var2<6)
-		// 	fall_state=-1;
-	}
+	if (person_state==0)
+		for (int i = 0; i < no_of_pits;i++)
+		{
+			var1=person_x-empty_cube[i][0];//-length_of_cube_base/2;
+			var2=person_z-empty_cube[i][1];//+length_of_cube_base/2;
+			if (person_y+jump_speed==length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
+				if (var1<length_of_cube_base/2 && var1>-1*length_of_cube_base/2 && var2<length_of_cube_base/2 && var2>-1*length_of_cube_base/2)
+				{
+					//cout<<i<<"	"<<person_x<<"	"<<person_z<<"	"<<empty_cube[i][0]<<"	"<<empty_cube[i][1]<<endl;
+					fall_state=1;
+				}
+			// if (i==0)
+			// 	cout<<i<<"	"<<person_x<<"	"<<person_z<<"	"<<empty_cube[i][0]<<"	"<<empty_cube[i][1]<<var1<<"	"<<var2<<endl;
+			// if (var1>-6&&var1<6&&var2>=-6&&var2<6)
+			// 	fall_state=-1;
+		}
 	for (int i = 0; i < no_of_obstacles-2*key;i++)
 	{
 		var1=person_x-obstacles[i][0];//-length_of_cube_base/2;
@@ -1678,19 +1698,30 @@ void draw ()
 	 	person_y=prev_y;
 	 	person_x=prev_x;
 		person_y-=1;
+		//cout<<"fall_state==1"<<endl;
 	}
 	if (gameover==0)
 	{
+		GLfloat clr[108];
+		for (int i = 0; i <36;i++)
+		{
+			clr[3*i]=person_health/100;
+			clr[3*i+2]=0;
+			clr[3*i+1]=0;
+		}
 		if (camera_x_direction==1||camera_x_direction==-1)
 		{
+			health=createCube(clr,2,person_health/2,2);
 			drawobject(person_leg,glm::vec3(person_x,person_y+jump_speed+10,person_z+6),person_hand_angle,glm::vec3(0,0,1));
 			drawobject(person_leg,glm::vec3(person_x,person_y+jump_speed+10,person_z-6),-1*person_hand_angle,glm::vec3(0,0,1));
 		}
 		if (camera_z_direction==1||camera_z_direction==-1)
 		{
+			health=createCube(clr,person_health/2,2,2);
 			drawobject(person_leg,glm::vec3(person_x+6,person_y+jump_speed+10,person_z),-1*person_hand_angle,glm::vec3(1,0,0));
 			drawobject(person_leg,glm::vec3(person_x-6,person_y+jump_speed+10,person_z),person_hand_angle,glm::vec3(1,0,0));
 		}
+		drawobject(health,glm::vec3(person_x,person_y+100,person_z),0,glm::vec3(0,1,0));
 		drawobject(person_body,glm::vec3(person_x,person_y+jump_speed+12+length_of_cube_base/3,person_z),0,glm::vec3(0,0,1));
 		for (int i = 0; i < 360; ++i)
 			drawobject(person_neck,glm::vec3(person_x,person_y+jump_speed+12+length_of_cube_base,person_z),i,glm::vec3(0,1,0));
@@ -1779,7 +1810,7 @@ void draw ()
 				var3*=-1;
 			if (var2>=0&&var2<50&&var1>=0&&var1<=20&&var3>=0&&var3<=15)
 			{
-				cout<<var2<<endl;
+				//cout<<var2<<endl;
 				gameover=1;
 			}
 			if (spike_y[i][0]>=100)
@@ -1792,6 +1823,29 @@ void draw ()
 				spike_y[i][0]-=0.5;
 		}
 	}
+	drawobject(background,glm::vec3(0,-3000,0),0,glm::vec3(0,1,0));
+	// int score1=score,var_s;
+ //    double x_cor=300,y_cor=150,z_cor=300;
+ //    while(score1!=0)
+ //    {
+ //        var_s=score1%10;
+ //        if (a[var_s][0]==1)
+ //            drawobject(score_cube_hor,glm::vec3(x_cor,y_cor,z_cor),0,glm::vec3(0,0,1));
+ //        if (a[var_s][1]==1)
+ //            drawobject(score_cube_ver,glm::vec3(x_cor+15,y_cor-15,z_cor),0,glm::vec3(0,0,1));
+ //        if (a[var_s][2]==1)
+ //            drawobject(score_cube_ver,glm::vec3(x_cor+15,y_cor-30,z_cor),0,glm::vec3(0,0,1));
+ //        if (a[var_s][3]==1)
+ //            drawobject(score_cube_hor,glm::vec3(x_cor,y_cor-30,z_cor),0,glm::vec3(0,0,1));
+ //        if (a[var_s][4]==1)
+ //            drawobject(score_cube_ver,glm::vec3(x_cor,y_cor-30,z_cor),0,glm::vec3(0,0,1));
+ //        if (a[var_s][5]==1)
+ //            drawobject(score_cube_ver,glm::vec3(x_cor,y_cor-15,z_cor),0,glm::vec3(0,0,1));
+ //        if (a[var_s][6]==1)
+ //            drawobject(score_cube_hor,glm::vec3(x_cor,y_cor-15,z_cor),0,glm::vec3(0,0,1));
+ //        score1/=10;
+ //        z_cor-=25;
+ //    }
 	if (key==0)
 	{
 		drawtexture(image1,glm::vec3(287.5,120,162.5),key_angle,glm::vec3(0,1,0));
@@ -1858,10 +1912,7 @@ void draw ()
 			{
 				drawobject(moving_block,glm::vec3(moving_base[i][0],moving_base[i][1],moving_base[i][2]),0,glm::vec3(0,1,0));
 				if (moving_base[i][4]==1)
-				{
-					score+=20;
 					drawtexture(coin,glm::vec3(moving_base[i][0],moving_base[i][1]+60,moving_base[i][2]),arrow_angle,glm::vec3(0,1,0));
-				}
 				if (moving_base[i][1]>120)
 					moving_base[i][3]=-1;
 				else if (moving_base[i][1]<=60)
@@ -1877,27 +1928,38 @@ void draw ()
 				if (var2<0)
 					var2*=-1;
 				var3=person_y-moving_base[i][1]-40;
-				if ((var1>=0&&var1<=25)&&(var2>=0&&var2<=25))
+				if ((var1>=0&&var1<=30)&&(var2>=0&&var2<=30))
 				{
+					// if (person_state==1)
+					// 	person_y=moving_base[i][1]+40+12.5;
+					//cout<<"1	"<<person_state<<endl;
 					if (var3<=0&&person_state==0)
 					{
 						person_x=prev_x;
 						person_y=prev_y;
 						person_z=prev_z;
+						//cout<<"in if1"<<endl;
 					}
-					else if ((var1<=20&&var2<=20)&&var3<=12.5)
+					if (var3<=12.5&&var3>=0&&(var1<19&&var2<19))
 					{
-						moving_base[i][4]=0;
+						if (moving_base[i][4]==1)
+							score+=20;
 						person_state=1;
+						moving_base[i][4]=0;
 					}
-					if (var1>20||var2>20)
+					if (var1>=19||var2>=19)
 						person_state=0;
 					if (person_state==1)
+					{
 						person_y=moving_base[i][1]+40+12.5;
+						//cout<<"in if"<<endl;
+					}
+					//cout<<"2	"<<person_state<<endl;
 				}
 				//cout<<person_y<<"	"<<moving_base[i][1]+40<<endl;
 			}
 	}
+	drawtexture(boat1,glm::vec3(50*cos(boat_angle*M_PI/180),150,50*cos(boat_angle*M_PI/180)),boat_angle,glm::vec3(0,1,0));
 	// glm::vec3 fontColor = glm::vec3(0,0,0);
 	// glUseProgram(fontProgramID);
 	// Matrices.view = glm::lookAt(glm::vec3(0,0,3), glm::vec3(0,0,0), glm::vec3(0,1,0)); // Fixed camera for 2D (ortho) in XY plane
@@ -1997,6 +2059,28 @@ void initGL (GLFWwindow* window, int width, int height)
 	if(textureID == 0 )
 		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
 	coin=createRectangle(textureID,100,150);
+	
+	textureID = createTexture("boat1.png");
+	if(textureID == 0 )
+		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
+	boat1=createRectangle(textureID,1000,1500);
+
+	textureID = createTexture("boat2.png");
+	if(textureID == 0 )
+		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
+	boat2=createRectangle(textureID,1000,1500);
+
+	textureID = createTexture("boat3.jpg");
+	if(textureID == 0 )
+		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
+	boat3=createRectangle(textureID,1000,1500);
+
+	textureID = createTexture("boat4.jpg");
+	if(textureID == 0 )
+		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
+	boat4=createRectangle(textureID,10000,15000);
+
+	
 	GLfloat clr[108];
 	for (int i = 0; i < 36;i++)
 	{
@@ -2021,6 +2105,8 @@ void initGL (GLFWwindow* window, int width, int height)
 	{
 		clr[i]=0;
 	}
+	score_cube_ver=createCube(clr,10,10,5);
+	score_cube_hor=createCube(clr,10,5,10);
 	moving_block=createCube(clr,20,20,40);
 	person_body=createCube(clr,length_of_cube_base/2,length_of_cube_base/2,length_of_cube_base/2);
 	person_leg=createCube1(clr,4,4,-12);
@@ -2058,6 +2144,13 @@ void initGL (GLFWwindow* window, int width, int height)
 	for (int i = 0; i < 54; i++)
 		clr[i]=0;
 	spike = createPyramid(clr,10,50);
+	for (int i = 0; i < 36;i++)
+	{
+		clr[3*i]=0.36;
+		clr[3*i+1]=0.4;
+		clr[3*i+2]=0.905;
+	}
+	background=createCube(clr,3000,3000,3000);
 	fontProgramID = LoadShaders( "fontrender.vert", "fontrender.frag" );
 	GLint fontVertexCoordAttrib, fontVertexNormalAttrib, fontVertexOffsetUniform;
 	fontVertexCoordAttrib = glGetAttribLocation(fontProgramID, "vertexPosition");
@@ -2106,15 +2199,19 @@ int main (int argc, char** argv)
 			// do something every 0.5 seconds ..
 			last_update_time = current_time;
 		}
-		if (person_y<length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base)
+		if (person_y<length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base-10)
+		{
+			//cout<<"here"<<endl;
 			fall_state=1;
+		}
 		if (person_y<=50)
 			gameover=1;
 		if (gameend==1)
 			break;
-		cout<<person_health<<endl;
-		//cout<<score<<endl;
+		//cout<<person_health<<endl;
+		cout<<score<<endl;
 		//cout<<person_y<<"	"<<length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base<<endl;
+		//cout<<person_jump<<"	"<<person_state<<endl;
 	}
 
 	glfwTerminate();
