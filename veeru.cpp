@@ -348,7 +348,7 @@ double xmousePos,ymousePos,mouse_scroll=0;
 double left_button_Pressed=0,right_button_Pressed=0;
 double gameover=0;
 double camera_x_direction=1,camera_z_direction=1,radius_of_camera=300;
-double key=1;
+double key=0;
 double top_view=1,reset_view=0,adventure_view=0,tower_view=0;
 double length_of_cube_base=25,length_of_base=30,width_of_base=30,height_of_base=5;
 double heights[30][30],empty_cube[300][2],no_of_pits=0;
@@ -884,7 +884,10 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	//gluPerspective (fov, (GLfloat) width / (GLfloat) height, 0.1, 5000.0f);
 	// Store the projection matrix in a variable for future use
 	// Perspective projection for 3D views
-	Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 5000.0f);
+	if (reshapeWindow_val==1)
+		Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 5000.0f);
+	else
+		Matrices.projection = glm::ortho(-1*(width*2/3)*1.0f, (width*2/3)*1.0f,-1*(height*2/3)*1.0f, (height*2/3)*1.0f, -1000*1.0f, 5000*1.0f);	
 	// Ortho projection for 2D views
 	//Matrices.projection = glm::ortho(-1*(width*2/3)*1.0f, (width*2/3)*1.0f,-1*(height*2/3)*1.0f, (height*2/3)*1.0f, -1000*1.0f, 5000*1.0f);
 }
@@ -2043,23 +2046,8 @@ void draw ()
 				//cout<<person_y<<"	"<<moving_base[i][1]+40<<endl;
 			}
 	}
-	drawtexture(boat1,glm::vec3(50*cos(boat_angle*M_PI/180),150,50*cos(boat_angle*M_PI/180)),boat_angle,glm::vec3(0,1,0));
-	// glm::vec3 fontColor = glm::vec3(0,0,0);
-	// glUseProgram(fontProgramID);
-	// Matrices.view = glm::lookAt(glm::vec3(0,0,3), glm::vec3(0,0,0), glm::vec3(0,1,0)); // Fixed camera for 2D (ortho) in XY plane
-	// glm::mat4 MVP;
-	// // Transform the text
-	// Matrices.model = glm::mat4(1.0f);
-	// glm::mat4 translateText = glm::translate(glm::vec3(200,130,200));
-	// glm::mat4 scaleText = glm::scale(glm::vec3(500,500,500));
-	// Matrices.model *= (translateText * scaleText);
-	// MVP = Matrices.projection * Matrices.view * Matrices.model;
-	// // send font's MVP and font color to fond shaders
-	// glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
-	// glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
-
-	// // Render font
-	// GL3Font.font->Render("SCORE:");
+	//drawtexture(boat1,glm::vec3(50*cos(boat_angle*M_PI/180),150,50*cos(boat_angle*M_PI/180)),boat_angle,glm::vec3(0,1,0));
+	
 
 
 	key_angle+=5;
@@ -2109,8 +2097,8 @@ GLFWwindow* initGLFW (int width, int height)
 	glfwSetCharCallback(window, keyboardChar);  // simpler specific character handling
 
 	/* Register function to handle mouse click */
+	
 	glfwSetMouseButtonCallback(window, mouseButton);  // mouse button clicks
-
 	return window;
 }
 
@@ -2303,6 +2291,27 @@ int main (int argc, char** argv)
 		cout<<score<<endl;
 		//cout<<person_y<<"	"<<length_of_cube_base*3/2.0+(height_of_base-2)*length_of_cube_base<<endl;
 		//cout<<person_jump<<"	"<<person_state<<endl;
+		// glm::vec3 fontColor = glm::vec3(0,0,0);
+		// glUseProgram(fontProgramID);
+		// Matrices.view = glm::lookAt(glm::vec3(0,0,3), glm::vec3(0,0,0), glm::vec3(0,1,0)); // Fixed camera for 2D (ortho) in XY plane
+		// glm::mat4 MVP;
+		// // Transform the text
+		// Matrices.model = glm::mat4(1.0f);
+		// glm::mat4 translateText = glm::translate(glm::vec3(200,130,200));
+		// glm::mat4 scaleText = glm::scale(glm::vec3(500,500,500));
+		// Matrices.model *= (translateText * scaleText);
+		// MVP = Matrices.projection * Matrices.view * Matrices.model;
+		// // send font's MVP and font color to fond shaders
+		// glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+		// glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
+		// reshapeWindow_val=0;
+		// reshapeWindow(window,width,height);
+		
+		// // Render font
+		// GL3Font.font->Render("SCORE:");
+		// reshapeWindow_val=1;
+		// reshapeWindow(window,width,height);
+
 		
 	}
 
